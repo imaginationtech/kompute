@@ -88,7 +88,7 @@ setupLogger();
     fmt::print("[{} {}] [debug] [{}:{}] {}\n",                                 \
                __DATE__,                                                       \
                __TIME__,                                                       \
-               __FILE_NAME__,                                                       \
+               __FILE_NAME__,                                                  \
                __LINE__,                                                       \
                fmt::format(__VA_ARGS__))
 #else

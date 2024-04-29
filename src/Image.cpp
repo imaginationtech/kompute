@@ -45,18 +45,19 @@ Image::toString(Image::ImageTypes dt)
 }
 
 Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-               std::shared_ptr<vk::Device> device,
-               void* data,
-               uint32_t width,
-               uint32_t height,
-               uint32_t numChannels,
-               const ImageDataTypes& dataType,
-               const ImageTypes& ImageType)
+             std::shared_ptr<vk::Device> device,
+             void* data,
+             uint32_t width,
+             uint32_t height,
+             uint32_t numChannels,
+             const ImageDataTypes& dataType,
+             const ImageTypes& ImageType)
 {
-    KP_LOG_DEBUG("Kompute Image constructor data width: {}, height: {}, and type: {}",
-                 width,
-                 height,
-                 Image::toString(ImageType));
+    KP_LOG_DEBUG(
+      "Kompute Image constructor data width: {}, height: {}, and type: {}",
+      width,
+      height,
+      Image::toString(ImageType));
 
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
@@ -64,7 +65,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mImageType = ImageType;
     this->mWidth = width;
     this->mHeight = height;
-    this->mNumChannels= numChannels;
+    this->mNumChannels = numChannels;
 
     this->rebuild(data);
 }
@@ -84,7 +85,10 @@ Image::~Image()
 void
 Image::rebuild(void* data)
 {
-    KP_LOG_DEBUG("Kompute Image rebuilding with size {} x {} with {} channels", this->mWidth, this->mHeight, this->mNumChannels);
+    KP_LOG_DEBUG("Kompute Image rebuilding with size {} x {} with {} channels",
+                 this->mWidth,
+                 this->mHeight,
+                 this->mNumChannels);
 
     if (this->mPrimaryImage || this->mPrimaryMemory) {
         KP_LOG_DEBUG(
@@ -164,8 +168,8 @@ Image::mapRawData()
     } else if (this->mImageType == ImageTypes::eDevice) {
         hostVisibleMemory = this->mStagingMemory;
     } else {
-        KP_LOG_WARN(
-          "Kompute Image mapping data not supported on {} Image", toString(this->ImageType()));
+        KP_LOG_WARN("Kompute Image mapping data not supported on {} Image",
+                    toString(this->ImageType()));
         return;
     }
 
@@ -175,7 +179,6 @@ Image::mapRawData()
     // flush
     this->mRawData = this->mDevice->mapMemory(
       *hostVisibleMemory, 0, imageSize, vk::MemoryMapFlags());
-
 }
 
 void
@@ -191,8 +194,8 @@ Image::unmapRawData()
     } else if (this->mImageType == ImageTypes::eDevice) {
         hostVisibleMemory = this->mStagingMemory;
     } else {
-        KP_LOG_WARN(
-          "Kompute Image mapping data not supported on {} Image", toString(this->ImageType()));
+        KP_LOG_WARN("Kompute Image mapping data not supported on {} Image",
+                    toString(this->ImageType()));
         return;
     }
 
@@ -204,112 +207,114 @@ Image::unmapRawData()
 
 void
 Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
-                       std::shared_ptr<Image> copyFromImage)
+                      std::shared_ptr<Image> copyFromImage)
 {
     vk::ImageSubresourceLayers layer = {};
-    vk::Offset3D offset = {0,0,0};
+    vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
-    vk::Extent3D size = {this->mWidth, this->mHeight, 1};
+    vk::Extent3D size = { this->mWidth, this->mHeight, 1 };
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
-    KP_LOG_DEBUG("Kompute Image recordCopyFrom size {},{}.", size.width, size.height);
+    KP_LOG_DEBUG(
+      "Kompute Image recordCopyFrom size {},{}.", size.width, size.height);
 
     this->recordCopyImage(commandBuffer,
-                           copyFromImage->mPrimaryImage,
-                           this->mPrimaryImage,
-                           copyRegion);
+                          copyFromImage->mPrimaryImage,
+                          this->mPrimaryImage,
+                          copyRegion);
 }
 
 void
 Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 {
     vk::ImageSubresourceLayers layer = {};
-    vk::Offset3D offset = {0,0,0};
+    vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
-    vk::Extent3D size = {this->mWidth, this->mHeight, 1};
+    vk::Extent3D size = { this->mWidth, this->mHeight, 1 };
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
     KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
 
-    this->recordCopyImage(commandBuffer,
-                           this->mStagingImage,
-                           this->mPrimaryImage,
-                           copyRegion);
+    this->recordCopyImage(
+      commandBuffer, this->mStagingImage, this->mPrimaryImage, copyRegion);
 }
 
 void
 Image::recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer)
 {
     vk::ImageSubresourceLayers layer = {};
-    vk::Offset3D offset = {0,0,0};
+    vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
-    vk::Extent3D size = {this->mWidth, this->mHeight, 1};
+    vk::Extent3D size = { this->mWidth, this->mHeight, 1 };
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
     KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
 
-    this->recordCopyImage(commandBuffer,
-                           this->mPrimaryImage,
-                           this->mStagingImage,
-                           copyRegion);
+    this->recordCopyImage(
+      commandBuffer, this->mPrimaryImage, this->mStagingImage, copyRegion);
 }
 
 void
 Image::recordCopyImage(const vk::CommandBuffer& commandBuffer,
-                         std::shared_ptr<vk::Image> imageFrom,
-                         std::shared_ptr<vk::Image> imageTo,
-                         vk::ImageCopy copyRegion)
+                       std::shared_ptr<vk::Image> imageFrom,
+                       std::shared_ptr<vk::Image> imageTo,
+                       vk::ImageCopy copyRegion)
 {
-    commandBuffer.copyImage(*imageFrom, vk::ImageLayout::eGeneral, *imageTo, vk::ImageLayout::eGeneral, 1, &copyRegion);
+    commandBuffer.copyImage(*imageFrom,
+                            vk::ImageLayout::eGeneral,
+                            *imageTo,
+                            vk::ImageLayout::eGeneral,
+                            1,
+                            &copyRegion);
 }
 
 void
 Image::recordPrimaryImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                         vk::AccessFlagBits srcAccessMask,
-                                         vk::AccessFlagBits dstAccessMask,
-                                         vk::PipelineStageFlagBits srcStageMask,
-                                         vk::PipelineStageFlagBits dstStageMask)
+                                       vk::AccessFlagBits srcAccessMask,
+                                       vk::AccessFlagBits dstAccessMask,
+                                       vk::PipelineStageFlagBits srcStageMask,
+                                       vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Image recording PRIMARY image memory barrier");
 
     this->recordImageMemoryBarrier(commandBuffer,
-                                    *this->mPrimaryImage,
-                                    srcAccessMask,
-                                    dstAccessMask,
-                                    srcStageMask,
-                                    dstStageMask);
+                                   *this->mPrimaryImage,
+                                   srcAccessMask,
+                                   dstAccessMask,
+                                   srcStageMask,
+                                   dstStageMask);
 }
 
 void
 Image::recordStagingImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                         vk::AccessFlagBits srcAccessMask,
-                                         vk::AccessFlagBits dstAccessMask,
-                                         vk::PipelineStageFlagBits srcStageMask,
-                                         vk::PipelineStageFlagBits dstStageMask)
+                                       vk::AccessFlagBits srcAccessMask,
+                                       vk::AccessFlagBits dstAccessMask,
+                                       vk::PipelineStageFlagBits srcStageMask,
+                                       vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Image recording STAGING image memory barrier");
 
     this->recordImageMemoryBarrier(commandBuffer,
-                                    *this->mStagingImage,
-                                    srcAccessMask,
-                                    dstAccessMask,
-                                    srcStageMask,
-                                    dstStageMask);
+                                   *this->mStagingImage,
+                                   srcAccessMask,
+                                   dstAccessMask,
+                                   srcStageMask,
+                                   dstStageMask);
 }
 
 void
 Image::recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                  const vk::Image& image,
-                                  vk::AccessFlagBits srcAccessMask,
-                                  vk::AccessFlagBits dstAccessMask,
-                                  vk::PipelineStageFlagBits srcStageMask,
-                                  vk::PipelineStageFlagBits dstStageMask)
+                                const vk::Image& image,
+                                vk::AccessFlagBits srcAccessMask,
+                                vk::AccessFlagBits dstAccessMask,
+                                vk::PipelineStageFlagBits srcStageMask,
+                                vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Image recording image memory barrier");
 
@@ -431,8 +436,7 @@ Image::allocateMemoryCreateGPUResources()
     KP_LOG_DEBUG("Kompute Image creating primary image and memory");
 
     this->mPrimaryImage = std::make_shared<vk::Image>();
-    this->createImage(this->mPrimaryImage,
-                       this->getPrimaryImageUsageFlags());
+    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags());
     this->mFreePrimaryImage = true;
     this->mPrimaryMemory = std::make_shared<vk::DeviceMemory>();
     this->allocateBindMemory(this->mPrimaryImage,
@@ -445,7 +449,7 @@ Image::allocateMemoryCreateGPUResources()
 
         this->mStagingImage = std::make_shared<vk::Image>();
         this->createImage(this->mStagingImage,
-                           this->getStagingImageUsageFlags());
+                          this->getStagingImageUsageFlags());
         this->mFreeStagingImage = true;
         this->mStagingMemory = std::make_shared<vk::DeviceMemory>();
         this->allocateBindMemory(this->mStagingImage,
@@ -459,7 +463,7 @@ Image::allocateMemoryCreateGPUResources()
 
 void
 Image::createImage(std::shared_ptr<vk::Image> image,
-                     vk::ImageUsageFlags imageUsageFlags)
+                   vk::ImageUsageFlags imageUsageFlags)
 {
 
     vk::DeviceSize imageSize = this->memorySize();
@@ -476,7 +480,7 @@ Image::createImage(std::shared_ptr<vk::Image> image,
 
     // TODO: Explore having concurrent sharing mode (with option)
     vk::ImageCreateInfo imageInfo;
-    
+
     imageInfo.flags = vk::ImageCreateFlags();
     imageInfo.imageType = vk::ImageType::e2D;
     imageInfo.format = this->getFormat();
@@ -490,8 +494,8 @@ Image::createImage(std::shared_ptr<vk::Image> image,
 
 void
 Image::allocateBindMemory(std::shared_ptr<vk::Image> image,
-                           std::shared_ptr<vk::DeviceMemory> memory,
-                           vk::MemoryPropertyFlags memoryPropertyFlags)
+                          std::shared_ptr<vk::DeviceMemory> memory,
+                          vk::MemoryPropertyFlags memoryPropertyFlags)
 {
 
     KP_LOG_DEBUG("Kompute Image allocating and binding memory");
@@ -618,119 +622,152 @@ Image::destroy()
     KP_LOG_DEBUG("Kompute Image successful destroy()");
 }
 
-constexpr size_t Image::elementTypeSize(Image::ImageDataTypes type)
+constexpr size_t
+Image::elementTypeSize(Image::ImageDataTypes type)
 {
-    switch(type)
-    {
-    case Image::ImageDataTypes::eS8: return sizeof(int8_t);
-    case Image::ImageDataTypes::eU8: return sizeof(uint8_t);
-    case Image::ImageDataTypes::eS16: return sizeof(int16_t);
-    case Image::ImageDataTypes::eU16: return sizeof(uint16_t);
-    case Image::ImageDataTypes::eS32: return sizeof(int32_t);
-    case Image::ImageDataTypes::eU32: return sizeof(uint32_t);
-    case Image::ImageDataTypes::eF16: return sizeof(int16_t);
-    case Image::ImageDataTypes::eF32: return sizeof(float);
-    default: 
-        throw std::runtime_error("Kompute Image invalid Image data type");
-        break;
+    switch (type) {
+        case Image::ImageDataTypes::eS8:
+            return sizeof(int8_t);
+        case Image::ImageDataTypes::eU8:
+            return sizeof(uint8_t);
+        case Image::ImageDataTypes::eS16:
+            return sizeof(int16_t);
+        case Image::ImageDataTypes::eU16:
+            return sizeof(uint16_t);
+        case Image::ImageDataTypes::eS32:
+            return sizeof(int32_t);
+        case Image::ImageDataTypes::eU32:
+            return sizeof(uint32_t);
+        case Image::ImageDataTypes::eF16:
+            return sizeof(int16_t);
+        case Image::ImageDataTypes::eF32:
+            return sizeof(float);
+        default:
+            throw std::runtime_error("Kompute Image invalid Image data type");
+            break;
     }
 
     return -1;
 }
 
-vk::Format Image::getFormat()
+vk::Format
+Image::getFormat()
 {
-    switch(this->mDataType)
-    {
-        case Image::ImageDataTypes::eS8:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR8Sint;
-                case 2: return vk::Format::eR8G8Sint;
-                case 3: return vk::Format::eR8G8B8Sint;
-                case 4: return vk::Format::eR8G8B8A8Sint;
-                default: return vk::Format::eUndefined;
+    switch (this->mDataType) {
+        case Image::ImageDataTypes::eS8: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR8Sint;
+                case 2:
+                    return vk::Format::eR8G8Sint;
+                case 3:
+                    return vk::Format::eR8G8B8Sint;
+                case 4:
+                    return vk::Format::eR8G8B8A8Sint;
+                default:
+                    return vk::Format::eUndefined;
             }
         }
-        case Image::ImageDataTypes::eU8:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR8Uint;
-                case 2: return vk::Format::eR8G8Uint;
-                case 3: return vk::Format::eR8G8B8Uint;
-                case 4: return vk::Format::eR8G8B8A8Uint;
-                default: return vk::Format::eUndefined;
+        case Image::ImageDataTypes::eU8: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR8Uint;
+                case 2:
+                    return vk::Format::eR8G8Uint;
+                case 3:
+                    return vk::Format::eR8G8B8Uint;
+                case 4:
+                    return vk::Format::eR8G8B8A8Uint;
+                default:
+                    return vk::Format::eUndefined;
             }
         }
-        case Image::ImageDataTypes::eU16:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR16Uint;
-                case 2: return vk::Format::eR16G16Uint;
-                case 3: return vk::Format::eR16G16B16Uint;
-                case 4: return vk::Format::eR16G16B16A16Uint;
-                default: return vk::Format::eUndefined;
+        case Image::ImageDataTypes::eU16: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR16Uint;
+                case 2:
+                    return vk::Format::eR16G16Uint;
+                case 3:
+                    return vk::Format::eR16G16B16Uint;
+                case 4:
+                    return vk::Format::eR16G16B16A16Uint;
+                default:
+                    return vk::Format::eUndefined;
             }
-        }  
-        case Image::ImageDataTypes::eS16:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR16Sint;
-                case 2: return vk::Format::eR16G16Sint;
-                case 3: return vk::Format::eR16G16B16Sint;
-                case 4: return vk::Format::eR16G16B16A16Sint;
-                default: return vk::Format::eUndefined;
+        }
+        case Image::ImageDataTypes::eS16: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR16Sint;
+                case 2:
+                    return vk::Format::eR16G16Sint;
+                case 3:
+                    return vk::Format::eR16G16B16Sint;
+                case 4:
+                    return vk::Format::eR16G16B16A16Sint;
+                default:
+                    return vk::Format::eUndefined;
             }
-        }  
-        case Image::ImageDataTypes::eU32:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR32Uint;
-                case 2: return vk::Format::eR32G32Uint;
-                case 3: return vk::Format::eR32G32B32Uint;
-                case 4: return vk::Format::eR32G32B32A32Uint;
-                default: return vk::Format::eUndefined;
+        }
+        case Image::ImageDataTypes::eU32: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR32Uint;
+                case 2:
+                    return vk::Format::eR32G32Uint;
+                case 3:
+                    return vk::Format::eR32G32B32Uint;
+                case 4:
+                    return vk::Format::eR32G32B32A32Uint;
+                default:
+                    return vk::Format::eUndefined;
             }
-        }  
-        case Image::ImageDataTypes::eS32:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR32Sint;
-                case 2: return vk::Format::eR32G32Sint;
-                case 3: return vk::Format::eR32G32B32Sint;
-                case 4: return vk::Format::eR32G32B32A32Sint;
-                default: return vk::Format::eUndefined;
+        }
+        case Image::ImageDataTypes::eS32: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR32Sint;
+                case 2:
+                    return vk::Format::eR32G32Sint;
+                case 3:
+                    return vk::Format::eR32G32B32Sint;
+                case 4:
+                    return vk::Format::eR32G32B32A32Sint;
+                default:
+                    return vk::Format::eUndefined;
             }
-        }      
-        case Image::ImageDataTypes::eF16:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR16Sfloat;
-                case 2: return vk::Format::eR16G16Sfloat;
-                case 3: return vk::Format::eR16G16B16Sfloat;
-                case 4: return vk::Format::eR16G16B16A16Sfloat;
-                default: return vk::Format::eUndefined;
+        }
+        case Image::ImageDataTypes::eF16: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR16Sfloat;
+                case 2:
+                    return vk::Format::eR16G16Sfloat;
+                case 3:
+                    return vk::Format::eR16G16B16Sfloat;
+                case 4:
+                    return vk::Format::eR16G16B16A16Sfloat;
+                default:
+                    return vk::Format::eUndefined;
             }
-        }  
-        case Image::ImageDataTypes::eF32:
-        {
-            switch(this->mNumChannels)
-            {
-                case 1: return vk::Format::eR32Sfloat;
-                case 2: return vk::Format::eR32G32Sfloat;
-                case 3: return vk::Format::eR32G32B32Sfloat;
-                case 4: return vk::Format::eR32G32B32A32Sfloat;
-                default: return vk::Format::eUndefined;
+        }
+        case Image::ImageDataTypes::eF32: {
+            switch (this->mNumChannels) {
+                case 1:
+                    return vk::Format::eR32Sfloat;
+                case 2:
+                    return vk::Format::eR32G32Sfloat;
+                case 3:
+                    return vk::Format::eR32G32B32Sfloat;
+                case 4:
+                    return vk::Format::eR32G32B32A32Sfloat;
+                default:
+                    return vk::Format::eUndefined;
             }
-        } 
-        default: return vk::Format::eUndefined;
+        }
+        default:
+            return vk::Format::eUndefined;
     }
 }
 

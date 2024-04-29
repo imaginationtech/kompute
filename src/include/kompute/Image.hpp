@@ -62,13 +62,13 @@ class Image
      *  @param imageType Type for the image which is of type ImageTypes
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-           std::shared_ptr<vk::Device> device,
-           void* data,
-           uint32_t width,
-           uint32_t height,
-           uint32_t numChannels,
-           const ImageDataTypes& dataType,
-           const ImageTypes& imageType = ImageTypes::eDevice);
+          std::shared_ptr<vk::Device> device,
+          void* data,
+          uint32_t width,
+          uint32_t height,
+          uint32_t numChannels,
+          const ImageDataTypes& dataType,
+          const ImageTypes& imageType = ImageTypes::eDevice);
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -276,20 +276,20 @@ class Image
 
     void allocateMemoryCreateGPUResources(); // Creates the vulkan image
     void createImage(std::shared_ptr<vk::Image> image,
-                      vk::ImageUsageFlags imageUsageFlags);
+                     vk::ImageUsageFlags imageUsageFlags);
     void allocateBindMemory(std::shared_ptr<vk::Image> image,
                             std::shared_ptr<vk::DeviceMemory> memory,
                             vk::MemoryPropertyFlags memoryPropertyFlags);
     void recordCopyImage(const vk::CommandBuffer& commandBuffer,
-                        std::shared_ptr<vk::Image> imageFrom,
-                        std::shared_ptr<vk::Image> imageTo,
-                        vk::ImageCopy copyRegion);
+                         std::shared_ptr<vk::Image> imageFrom,
+                         std::shared_ptr<vk::Image> imageTo,
+                         vk::ImageCopy copyRegion);
     void recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                   const vk::Image& image,
-                                   vk::AccessFlagBits srcAccessMask,
-                                   vk::AccessFlagBits dstAccessMask,
-                                   vk::PipelineStageFlagBits srcStageMask,
-                                   vk::PipelineStageFlagBits dstStageMask);
+                                  const vk::Image& image,
+                                  vk::AccessFlagBits srcAccessMask,
+                                  vk::AccessFlagBits dstAccessMask,
+                                  vk::PipelineStageFlagBits srcStageMask,
+                                  vk::PipelineStageFlagBits dstStageMask);
 
     // Private util functions
     vk::ImageUsageFlags getPrimaryImageUsageFlags();
@@ -310,27 +310,31 @@ class ImageT : public Image
 
   public:
     ImageT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-            std::shared_ptr<vk::Device> device,
-            const std::vector<T>& data,
-            uint32_t width,
-            uint32_t height,
-            uint32_t numChannels,
-            const ImageTypes& imageType = ImageTypes::eDevice)
+           std::shared_ptr<vk::Device> device,
+           const std::vector<T>& data,
+           uint32_t width,
+           uint32_t height,
+           uint32_t numChannels,
+           const ImageTypes& imageType = ImageTypes::eDevice)
       : Image(physicalDevice,
-               device,
-               (void*)data.data(),
-               width,
-               height,
-               numChannels,
-               this->dataType(),
-               imageType)
+              device,
+              (void*)data.data(),
+              width,
+              height,
+              numChannels,
+              this->dataType(),
+              imageType)
     {
-        KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, height {}, and num channels {}",
-                     data.size(), width, height, numChannels);
-        if (data.size() < width * height * numChannels)
-        {
-          throw std::runtime_error("Kompute ImageT vector is smaller than the requested image size");
-        }   
+        KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, "
+                     "height {}, and num channels {}",
+                     data.size(),
+                     width,
+                     height,
+                     numChannels);
+        if (data.size() < width * height * numChannels) {
+            throw std::runtime_error(
+              "Kompute ImageT vector is smaller than the requested image size");
+        }
     }
 
     ~ImageT() { KP_LOG_DEBUG("Kompute imageT destructor"); }

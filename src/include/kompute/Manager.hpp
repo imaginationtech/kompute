@@ -6,9 +6,9 @@
 
 #include "kompute/Core.hpp"
 
+#include "kompute/Image.hpp"
 #include "kompute/Sequence.hpp"
 #include "logger/Logger.hpp"
-#include "kompute/Image.hpp"
 
 #define KP_DEFAULT_SESSION "DEFAULT"
 
@@ -135,13 +135,22 @@ class Manager
      */
     template<typename T>
     std::shared_ptr<ImageT<T>> imageT(
-      const std::vector<T>& data, uint32_t width, uint32_t height, uint32_t numChannels,
+      const std::vector<T>& data,
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
       Image::ImageTypes imageType = Image::ImageTypes::eDevice)
     {
         KP_LOG_DEBUG("Kompute Manager image creation triggered");
 
         std::shared_ptr<ImageT<T>> image{ new kp::ImageT<T>(
-          this->mPhysicalDevice, this->mDevice, data, width, height, numChannels, imageType) };
+          this->mPhysicalDevice,
+          this->mDevice,
+          data,
+          width,
+          height,
+          numChannels,
+          imageType) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);
@@ -152,7 +161,9 @@ class Manager
 
     std::shared_ptr<ImageT<float>> image(
       const std::vector<float>& data,
-      uint32_t width, uint32_t height, uint32_t numChannels,
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
       Image::ImageTypes imageType = Image::ImageTypes::eDevice)
     {
         return this->imageT<float>(data, width, height, numChannels, imageType);
@@ -167,13 +178,13 @@ class Manager
       Image::ImageTypes imageType = Image::ImageTypes::eDevice)
     {
         std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
-                                                       this->mDevice,
-                                                       data,
-                                                       width,
-                                                       height,
-                                                       numChannels,
-                                                       dataType,
-                                                       imageType) };
+                                                    this->mDevice,
+                                                    data,
+                                                    width,
+                                                    height,
+                                                    numChannels,
+                                                    dataType,
+                                                    imageType) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);
