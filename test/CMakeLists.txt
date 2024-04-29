@@ -21,7 +21,8 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestPushConstant.cpp
     TestSequence.cpp
     TestSpecializationConstant.cpp
-    TestWorkgroup.cpp)
+    TestWorkgroup.cpp
+    TestImage.cpp)
 
 target_link_libraries(kompute_tests PRIVATE GTest::gtest_main
     kompute::kompute

@@ -8,6 +8,7 @@
 
 #include "kompute/Sequence.hpp"
 #include "logger/Logger.hpp"
+#include "kompute/Image.hpp"
 
 #define KP_DEFAULT_SESSION "DEFAULT"
 
@@ -125,6 +126,63 @@ class Manager
     }
 
     /**
+     * Create a managed image that will be destroyed by this manager
+     * if it hasn't been destroyed by its reference count going to zero.
+     *
+     * @param data The data to initialize the image with
+     * @param tensorType The type of image to initialize
+     * @returns Shared pointer with initialised image
+     */
+    template<typename T>
+    std::shared_ptr<ImageT<T>> imageT(
+      const std::vector<T>& data, uint32_t width, uint32_t height, uint32_t numChannels,
+      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+    {
+        KP_LOG_DEBUG("Kompute Manager image creation triggered");
+
+        std::shared_ptr<ImageT<T>> image{ new kp::ImageT<T>(
+          this->mPhysicalDevice, this->mDevice, data, width, height, numChannels, imageType) };
+
+        if (this->mManageResources) {
+            this->mManagedImages.push_back(image);
+        }
+
+        return image;
+    }
+
+    std::shared_ptr<ImageT<float>> image(
+      const std::vector<float>& data,
+      uint32_t width, uint32_t height, uint32_t numChannels,
+      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+    {
+        return this->imageT<float>(data, width, height, numChannels, imageType);
+    }
+
+    std::shared_ptr<Image> image(
+      void* data,
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
+      const Image::ImageDataTypes& dataType,
+      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+    {
+        std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
+                                                       this->mDevice,
+                                                       data,
+                                                       width,
+                                                       height,
+                                                       numChannels,
+                                                       dataType,
+                                                       imageType) };
+
+        if (this->mManageResources) {
+            this->mManagedImages.push_back(image);
+        }
+
+        return image;
+    }
+
+    /**
      * Default non-template function that can be used to create algorithm
      * objects which provides default types to the push and spec constants as
      * floats.
@@ -233,6 +291,7 @@ class Manager
 
     // -------------- ALWAYS OWNED RESOURCES
     std::vector<std::weak_ptr<Tensor>> mManagedTensors;
+    std::vector<std::weak_ptr<Image>> mManagedImages;
     std::vector<std::weak_ptr<Sequence>> mManagedSequences;
     std::vector<std::weak_ptr<Algorithm>> mManagedAlgorithms;
 

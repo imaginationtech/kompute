@@ -66,6 +66,7 @@ class Image
            void* data,
            uint32_t width,
            uint32_t height,
+           uint32_t numChannels,
            const ImageDataTypes& dataType,
            const ImageTypes& imageType = ImageTypes::eDevice);
 
@@ -255,6 +256,7 @@ class Image
     uint32_t mDataTypeMemorySize;
     uint32_t mWidth;
     uint32_t mHeight;
+    uint32_t mNumChannels;
     void* mRawData;
 
   private:
@@ -297,6 +299,9 @@ class Image
 
     void mapRawData();
     void unmapRawData();
+
+    constexpr size_t elementTypeSize(ImageDataTypes type);
+    vk::Format getFormat();
 };
 
 template<typename T>
@@ -307,17 +312,25 @@ class ImageT : public Image
     ImageT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
             std::shared_ptr<vk::Device> device,
             const std::vector<T>& data,
+            uint32_t width,
+            uint32_t height,
+            uint32_t numChannels,
             const ImageTypes& imageType = ImageTypes::eDevice)
       : Image(physicalDevice,
                device,
                (void*)data.data(),
-               data.size(),
-               sizeof(T),
+               width,
+               height,
+               numChannels,
                this->dataType(),
                imageType)
     {
-        KP_LOG_DEBUG("Kompute imageT constructor with data size {}",
-                     data.size());
+        KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, height {}, and num channels {}",
+                     data.size(), width, height, numChannels);
+        if (data.size() < width * height * numChannels)
+        {
+          throw std::runtime_error("Kompute ImageT vector is smaller than the requested image size");
+        }   
     }
 
     ~ImageT() { KP_LOG_DEBUG("Kompute imageT destructor"); }
