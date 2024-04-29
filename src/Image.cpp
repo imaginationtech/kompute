@@ -59,6 +59,11 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
       height,
       Image::toString(ImageType));
 
+    if (!data || width == 0 || height == 0 || numChannels == 0) {
+        throw std::runtime_error(
+          "Kompute Image attempted to create a zero-sized image");
+    }
+
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
     this->mDataType = dataType;

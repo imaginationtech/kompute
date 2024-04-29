@@ -119,6 +119,16 @@ Manager::destroy()
         this->mManagedTensors.clear();
     }
 
+    if (this->mManageResources && this->mManagedImages.size()) {
+        KP_LOG_DEBUG("Kompute Manager explicitly freeing images");
+        for (const std::weak_ptr<Image>& weakTensor : this->mManagedImages) {
+            if (std::shared_ptr<Image> image = weakTensor.lock()) {
+                image->destroy();
+            }
+        }
+        this->mManagedImages.clear();
+    }
+
     if (this->mFreeDevice) {
         KP_LOG_INFO("Destroying device");
         this->mDevice->destroy(
