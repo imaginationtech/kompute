@@ -49,11 +49,13 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
                void* data,
                uint32_t width,
                uint32_t height,
+               uint32_t numChannels,
                const ImageDataTypes& dataType,
                const ImageTypes& ImageType)
 {
-    KP_LOG_DEBUG("Kompute Image constructor data length: {}, and type: {}",
-                 elementTotalCount,
+    KP_LOG_DEBUG("Kompute Image constructor data width: {}, height: {}, and type: {}",
+                 width,
+                 height,
                  Image::toString(ImageType));
 
     this->mPhysicalDevice = physicalDevice;
@@ -62,6 +64,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mImageType = ImageType;
     this->mWidth = width;
     this->mHeight = height;
+    this->mNumChannels= numChannels;
 
     this->rebuild(data);
 }
@@ -81,7 +84,7 @@ Image::~Image()
 void
 Image::rebuild(void* data)
 {
-    KP_LOG_DEBUG("Kompute Image rebuilding with size {} x {}", this->mWidth, this->mHeight);
+    KP_LOG_DEBUG("Kompute Image rebuilding with size {} x {} with {} channels", this->mWidth, this->mHeight, this->mNumChannels);
 
     if (this->mPrimaryImage || this->mPrimaryMemory) {
         KP_LOG_DEBUG(
@@ -89,6 +92,8 @@ Image::rebuild(void* data)
         this->destroy();
     }
 
+    this->mSize = this->mWidth * this->mHeight * this->mNumChannels;
+    this->mDataTypeMemorySize = elementTypeSize(this->mDataType);
     this->allocateMemoryCreateGPUResources();
 
     if (this->ImageType() != Image::ImageTypes::eStorage) {
@@ -209,7 +214,7 @@ Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
-    KP_LOG_DEBUG("Kompute Image recordCopyFrom data size {}.", imageSize);
+    KP_LOG_DEBUG("Kompute Image recordCopyFrom size {},{}.", size.width, size.height);
 
     this->recordCopyImage(commandBuffer,
                            copyFromImage->mPrimaryImage,
@@ -228,7 +233,7 @@ Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
-    KP_LOG_DEBUG("Kompute Image copying data size {}.", imageSize);
+    KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
 
     this->recordCopyImage(commandBuffer,
                            this->mStagingImage,
@@ -247,7 +252,7 @@ Image::recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer)
 
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
-    KP_LOG_DEBUG("Kompute Image copying data size {}.", imageSize);
+    KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
 
     this->recordCopyImage(commandBuffer,
                            this->mPrimaryImage,
@@ -470,16 +475,15 @@ Image::createImage(std::shared_ptr<vk::Image> image,
                  vk::to_string(imageUsageFlags));
 
     // TODO: Explore having concurrent sharing mode (with option)
-    // FIXME: RQ: Set this up properly.
     vk::ImageCreateInfo imageInfo;
+    
+    imageInfo.flags = vk::ImageCreateFlags();
+    imageInfo.imageType = vk::ImageType::e2D;
+    imageInfo.format = this->getFormat();
+    imageInfo.extent = vk::Extent3D(this->mWidth, this->mHeight, 1);
     imageInfo.usage = imageUsageFlags;
-#if 0
-    vk::ImageCreateInfo imageInfo(vk::ImageCreateFlags(),
-                                    vk::ImageType::e2D,
-
-                                    imageUsageFlags,
-                                    vk::SharingMode::eExclusive);
-#endif
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
 
     this->mDevice->createImage(&imageInfo, nullptr, image.get());
 }
@@ -614,6 +618,122 @@ Image::destroy()
     KP_LOG_DEBUG("Kompute Image successful destroy()");
 }
 
+constexpr size_t Image::elementTypeSize(Image::ImageDataTypes type)
+{
+    switch(type)
+    {
+    case Image::ImageDataTypes::eS8: return sizeof(int8_t);
+    case Image::ImageDataTypes::eU8: return sizeof(uint8_t);
+    case Image::ImageDataTypes::eS16: return sizeof(int16_t);
+    case Image::ImageDataTypes::eU16: return sizeof(uint16_t);
+    case Image::ImageDataTypes::eS32: return sizeof(int32_t);
+    case Image::ImageDataTypes::eU32: return sizeof(uint32_t);
+    case Image::ImageDataTypes::eF16: return sizeof(int16_t);
+    case Image::ImageDataTypes::eF32: return sizeof(float);
+    default: 
+        throw std::runtime_error("Kompute Image invalid Image data type");
+        break;
+    }
+
+    return -1;
+}
+
+vk::Format Image::getFormat()
+{
+    switch(this->mDataType)
+    {
+        case Image::ImageDataTypes::eS8:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR8Sint;
+                case 2: return vk::Format::eR8G8Sint;
+                case 3: return vk::Format::eR8G8B8Sint;
+                case 4: return vk::Format::eR8G8B8A8Sint;
+                default: return vk::Format::eUndefined;
+            }
+        }
+        case Image::ImageDataTypes::eU8:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR8Uint;
+                case 2: return vk::Format::eR8G8Uint;
+                case 3: return vk::Format::eR8G8B8Uint;
+                case 4: return vk::Format::eR8G8B8A8Uint;
+                default: return vk::Format::eUndefined;
+            }
+        }
+        case Image::ImageDataTypes::eU16:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR16Uint;
+                case 2: return vk::Format::eR16G16Uint;
+                case 3: return vk::Format::eR16G16B16Uint;
+                case 4: return vk::Format::eR16G16B16A16Uint;
+                default: return vk::Format::eUndefined;
+            }
+        }  
+        case Image::ImageDataTypes::eS16:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR16Sint;
+                case 2: return vk::Format::eR16G16Sint;
+                case 3: return vk::Format::eR16G16B16Sint;
+                case 4: return vk::Format::eR16G16B16A16Sint;
+                default: return vk::Format::eUndefined;
+            }
+        }  
+        case Image::ImageDataTypes::eU32:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR32Uint;
+                case 2: return vk::Format::eR32G32Uint;
+                case 3: return vk::Format::eR32G32B32Uint;
+                case 4: return vk::Format::eR32G32B32A32Uint;
+                default: return vk::Format::eUndefined;
+            }
+        }  
+        case Image::ImageDataTypes::eS32:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR32Sint;
+                case 2: return vk::Format::eR32G32Sint;
+                case 3: return vk::Format::eR32G32B32Sint;
+                case 4: return vk::Format::eR32G32B32A32Sint;
+                default: return vk::Format::eUndefined;
+            }
+        }      
+        case Image::ImageDataTypes::eF16:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR16Sfloat;
+                case 2: return vk::Format::eR16G16Sfloat;
+                case 3: return vk::Format::eR16G16B16Sfloat;
+                case 4: return vk::Format::eR16G16B16A16Sfloat;
+                default: return vk::Format::eUndefined;
+            }
+        }  
+        case Image::ImageDataTypes::eF32:
+        {
+            switch(this->mNumChannels)
+            {
+                case 1: return vk::Format::eR32Sfloat;
+                case 2: return vk::Format::eR32G32Sfloat;
+                case 3: return vk::Format::eR32G32B32Sfloat;
+                case 4: return vk::Format::eR32G32B32A32Sfloat;
+                default: return vk::Format::eUndefined;
+            }
+        } 
+        default: return vk::Format::eUndefined;
+    }
+}
+
 template<>
 Image::ImageDataTypes
 ImageT<int8_t>::dataType()
@@ -626,6 +746,20 @@ Image::ImageDataTypes
 ImageT<uint8_t>::dataType()
 {
     return Image::ImageDataTypes::eU8;
+}
+
+template<>
+Image::ImageDataTypes
+ImageT<int16_t>::dataType()
+{
+    return Image::ImageDataTypes::eS16;
+}
+
+template<>
+Image::ImageDataTypes
+ImageT<uint16_t>::dataType()
+{
+    return Image::ImageDataTypes::eU16;
 }
 
 template<>
