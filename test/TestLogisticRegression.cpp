@@ -16,25 +16,25 @@ TEST(TestLogisticRegression, TestMainLogisticRegression)
     {
         kp::Manager mgr;
 
-        std::shared_ptr<kp::TensorT<float>> xI = mgr.tensor({ 0, 1, 1, 1, 1 });
-        std::shared_ptr<kp::TensorT<float>> xJ = mgr.tensor({ 0, 0, 0, 1, 1 });
+        std::shared_ptr<kp::Memory> xI = mgr.tensor({ 0, 1, 1, 1, 1 });
+        std::shared_ptr<kp::Memory> xJ = mgr.tensor({ 0, 0, 0, 1, 1 });
 
-        std::shared_ptr<kp::TensorT<float>> y = mgr.tensor({ 0, 0, 0, 1, 1 });
+        std::shared_ptr<kp::Memory> y = mgr.tensor({ 0, 0, 0, 1, 1 });
 
-        std::shared_ptr<kp::TensorT<float>> wIn = mgr.tensor({ 0.001, 0.001 });
-        std::shared_ptr<kp::TensorT<float>> wOutI =
+        std::shared_ptr<kp::Memory> wIn = mgr.tensor({ 0.001, 0.001 });
+        std::shared_ptr<kp::Memory> wOutI =
           mgr.tensor({ 0, 0, 0, 0, 0 });
-        std::shared_ptr<kp::TensorT<float>> wOutJ =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
-
-        std::shared_ptr<kp::TensorT<float>> bIn = mgr.tensor({ 0 });
-        std::shared_ptr<kp::TensorT<float>> bOut =
+        std::shared_ptr<kp::Memory> wOutJ =
           mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::shared_ptr<kp::TensorT<float>> lOut =
+        std::shared_ptr<kp::Memory> bIn = mgr.tensor({ 0 });
+        std::shared_ptr<kp::Memory> bOut =
           mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::vector<std::shared_ptr<kp::Tensor>> params = { xI,  xJ,    y,
+        std::shared_ptr<kp::Memory> lOut =
+          mgr.tensor({ 0, 0, 0, 0, 0 });
+
+        std::vector<std::shared_ptr<kp::Memory>> params = { xI,  xJ,    y,
                                                             wIn, wOutI, wOutJ,
                                                             bIn, bOut,  lOut };
 
@@ -91,27 +91,27 @@ TEST(TestLogisticRegression, TestMainLogisticRegressionManualCopy)
     {
         kp::Manager mgr;
 
-        std::shared_ptr<kp::TensorT<float>> xI = mgr.tensor({ 0, 1, 1, 1, 1 });
-        std::shared_ptr<kp::TensorT<float>> xJ = mgr.tensor({ 0, 0, 0, 1, 1 });
+        std::shared_ptr<kp::Memory> xI = mgr.tensor({ 0, 1, 1, 1, 1 });
+        std::shared_ptr<kp::Memory> xJ = mgr.tensor({ 0, 0, 0, 1, 1 });
 
-        std::shared_ptr<kp::TensorT<float>> y = mgr.tensor({ 0, 0, 0, 1, 1 });
+        std::shared_ptr<kp::Memory> y = mgr.tensor({ 0, 0, 0, 1, 1 });
 
-        std::shared_ptr<kp::TensorT<float>> wIn =
-          mgr.tensor({ 0.001, 0.001 }, kp::Tensor::TensorTypes::eHost);
-        std::shared_ptr<kp::TensorT<float>> wOutI =
+        std::shared_ptr<kp::Memory> wIn =
+          mgr.tensor({ 0.001, 0.001 }, kp::Memory::MemoryTypes::eHost);
+        std::shared_ptr<kp::Memory> wOutI =
           mgr.tensor({ 0, 0, 0, 0, 0 });
-        std::shared_ptr<kp::TensorT<float>> wOutJ =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
-
-        std::shared_ptr<kp::TensorT<float>> bIn =
-          mgr.tensor({ 0 }, kp::Tensor::TensorTypes::eHost);
-        std::shared_ptr<kp::TensorT<float>> bOut =
+        std::shared_ptr<kp::Memory> wOutJ =
           mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::shared_ptr<kp::TensorT<float>> lOut =
+        std::shared_ptr<kp::Memory> bIn =
+          mgr.tensor({ 0 }, kp::Memory::MemoryTypes::eHost);
+        std::shared_ptr<kp::Memory> bOut =
           mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::vector<std::shared_ptr<kp::Tensor>> params = { xI,  xJ,    y,
+        std::shared_ptr<kp::Memory> lOut =
+          mgr.tensor({ 0, 0, 0, 0, 0 });
+
+        std::vector<std::shared_ptr<kp::Memory>> params = { xI,  xJ,    y,
                                                             wIn, wOutI, wOutJ,
                                                             bIn, bOut,  lOut };
 

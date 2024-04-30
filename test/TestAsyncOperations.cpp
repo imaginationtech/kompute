@@ -50,7 +50,7 @@ TEST(TestAsyncOperations, TestManagerParallelExecution)
 
     std::shared_ptr<kp::Sequence> sq = mgr.sequence();
 
-    std::vector<std::shared_ptr<kp::Tensor>> inputsSyncB;
+    std::vector<std::shared_ptr<kp::Memory>> inputsSyncB;
     std::vector<std::shared_ptr<kp::Algorithm>> algorithms;
 
     for (uint32_t i = 0; i < numParallel; i++) {
@@ -81,7 +81,7 @@ TEST(TestAsyncOperations, TestManagerParallelExecution)
 
     kp::Manager mgrAsync(0, { 0, 2 });
 
-    std::vector<std::shared_ptr<kp::Tensor>> inputsAsyncB;
+    std::vector<std::shared_ptr<kp::Memory>> inputsAsyncB;
 
     std::vector<std::shared_ptr<kp::Algorithm>> algosAsync;
 
@@ -155,8 +155,8 @@ TEST(TestAsyncOperations, TestManagerAsyncExecution)
 
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor(data);
-    std::shared_ptr<kp::TensorT<float>> tensorB = mgr.tensor(data);
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(data);
+    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(data);
 
     std::shared_ptr<kp::Sequence> sq1 = mgr.sequence();
     std::shared_ptr<kp::Sequence> sq2 = mgr.sequence();
@@ -219,8 +219,8 @@ TEST(TestAsyncOperations, TestManagerAsyncExecutionTimeout)
 
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor(data);
-    std::shared_ptr<kp::TensorT<float>> tensorB = mgr.tensor(data);
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(data);
+    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(data);
 
     std::shared_ptr<kp::Sequence> sq1 = mgr.sequence();
     std::shared_ptr<kp::Sequence> sq2 = mgr.sequence();

@@ -7,7 +7,7 @@
 namespace kp {
 
 OpTensorSyncLocal::OpTensorSyncLocal(
-  const std::vector<std::shared_ptr<Tensor>>& tensors)
+  const std::vector<std::shared_ptr<Memory>>& tensors)
 {
     KP_LOG_DEBUG("Kompute OpTensorSyncLocal constructor with params");
 
@@ -30,9 +30,9 @@ OpTensorSyncLocal::record(const vk::CommandBuffer& commandBuffer)
     KP_LOG_DEBUG("Kompute OpTensorSyncLocal record called");
 
     for (size_t i = 0; i < this->mTensors.size(); i++) {
-        if (this->mTensors[i]->tensorType() == Tensor::TensorTypes::eDevice) {
+        if (this->mTensors[i]->memoryType() == Memory::MemoryTypes::eDevice) {
 
-            this->mTensors[i]->recordPrimaryBufferMemoryBarrier(
+            this->mTensors[i]->recordPrimaryMemoryBarrier(
               commandBuffer,
               vk::AccessFlagBits::eShaderWrite,
               vk::AccessFlagBits::eTransferRead,
@@ -41,7 +41,7 @@ OpTensorSyncLocal::record(const vk::CommandBuffer& commandBuffer)
 
             this->mTensors[i]->recordCopyFromDeviceToStaging(commandBuffer);
 
-            this->mTensors[i]->recordPrimaryBufferMemoryBarrier(
+            this->mTensors[i]->recordPrimaryMemoryBarrier(
               commandBuffer,
               vk::AccessFlagBits::eTransferWrite,
               vk::AccessFlagBits::eHostRead,

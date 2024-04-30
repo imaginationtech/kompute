@@ -45,7 +45,7 @@ TEST(TestMultipleAlgoExecutions, TestEndToEndFunctionality)
         }
     )");
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = {
+    std::vector<std::shared_ptr<kp::Memory>> params = {
         tensorInA, tensorInB, tensorOutA, tensorOutB
     };
 
@@ -79,7 +79,7 @@ TEST(TestMultipleAlgoExecutions, SingleSequenceRecord)
 
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
@@ -120,7 +120,7 @@ TEST(TestMultipleAlgoExecutions, MultipleCmdBufRecords)
 {
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory>> tensorA = mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
@@ -156,7 +156,7 @@ TEST(TestMultipleAlgoExecutions, MultipleSequences)
 
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
@@ -191,7 +191,7 @@ TEST(TestMultipleAlgoExecutions, SingleRecordMultipleEval)
 {
     kp::Manager mgr;
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory> tensorA = { mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
@@ -256,7 +256,7 @@ TEST(TestMultipleAlgoExecutions, TestAlgorithmUtilFunctions)
         }
     )");
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = {
+    std::vector<std::shared_ptr<kp::Memory>> params = {
         tensorInA, tensorInB, tensorOutA, tensorOutB
     };
 

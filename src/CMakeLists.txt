@@ -18,7 +18,11 @@ add_library(kompute Algorithm.cpp
     Sequence.cpp
     Tensor.cpp
     Core.cpp
-    Image.cpp)
+    Image.cpp
+    Memory.cpp
+    OpImageCopy.cpp
+    OpImageSyncDevice.cpp
+    OpImageSyncLocal.cpp)
 
 add_library(kompute::kompute ALIAS kompute)
 

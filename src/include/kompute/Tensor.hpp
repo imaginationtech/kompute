@@ -3,6 +3,7 @@
 
 #include "kompute/Core.hpp"
 #include "logger/Logger.hpp"
+#include "Memory.hpp"
 #include <memory>
 #include <string>
 
@@ -16,21 +17,9 @@ namespace kp {
  * would be used to store their respective data. The tensors can be used for GPU
  * data storage or transfer.
  */
-class Tensor
+class Tensor : public Memory
 {
   public:
-    /**
-     * Type for tensors created: Device allows memory to be transferred from
-     * staging buffers. Staging are host memory visible. Storage are device
-     * visible but are not set up to transfer or receive data (only for shader
-     * storage).
-     */
-    enum class TensorTypes
-    {
-        eDevice = 0,  ///< Type is device memory, source and destination
-        eHost = 1,    ///< Type is host memory, source and destination
-        eStorage = 2, ///< Type is Device memory (only)
-    };
     enum class TensorDataTypes
     {
         eBool = 0,
@@ -42,7 +31,6 @@ class Tensor
     };
 
     static std::string toString(TensorDataTypes dt);
-    static std::string toString(TensorTypes dt);
 
     /**
      *  Constructor with data provided which would be used to create the
@@ -52,7 +40,7 @@ class Tensor
      *  @param device The device to use to create the buffer and memory from
      *  @param data Non-zero-sized vector of data that will be used by the
      * tensor
-     *  @param tensorTypes Type for the tensor which is of type TensorTypes
+     *  @param tensorTypes Type for the tensor which is of type MemoryTypes
      */
     Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
            std::shared_ptr<vk::Device> device,
@@ -60,7 +48,7 @@ class Tensor
            uint32_t elementTotalCount,
            uint32_t elementMemorySize,
            const TensorDataTypes& dataType,
-           const TensorTypes& tensorType = TensorTypes::eDevice);
+           const MemoryTypes& tensorType = MemoryTypes::eDevice);
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -92,15 +80,8 @@ class Tensor
     bool isInit();
 
     /**
-     * Retrieve the tensor type of the Tensor
-     *
-     * @return Tensor type of tensor
-     */
-    TensorTypes tensorType();
-
-    /**
      * Records a copy from the memory of the tensor provided to the current
-     * thensor. This is intended to pass memory into a processing, to perform
+     * tensor. This is intended to pass memory into a processing, to perform
      * a staging buffer transfer, or to gather output (between others).
      *
      * @param commandBuffer Vulkan Command Buffer to record the commands into
@@ -128,7 +109,7 @@ class Tensor
     void recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer);
 
     /**
-     * Records the buffer memory barrier into the primary buffer and command
+     * Records the memory barrier into the primary buffer and command
      * buffer which ensures that relevant data transfers are carried out
      * correctly.
      *
@@ -138,14 +119,14 @@ class Tensor
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordPrimaryBufferMemoryBarrier(
+    void recordPrimaryMemoryBarrier(
       const vk::CommandBuffer& commandBuffer,
       vk::AccessFlagBits srcAccessMask,
       vk::AccessFlagBits dstAccessMask,
       vk::PipelineStageFlagBits srcStageMask,
       vk::PipelineStageFlagBits dstStageMask);
     /**
-     * Records the buffer memory barrier into the staging buffer and command
+     * Records the memory barrier into the staging buffer and command
      * buffer which ensures that relevant data transfers are carried out
      * correctly.
      *
@@ -155,7 +136,7 @@ class Tensor
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordStagingBufferMemoryBarrier(
+    void recordStagingMemoryBarrier(
       const vk::CommandBuffer& commandBuffer,
       vk::AccessFlagBits srcAccessMask,
       vk::AccessFlagBits dstAccessMask,
@@ -163,39 +144,13 @@ class Tensor
       vk::PipelineStageFlagBits dstStageMask);
 
     /**
-     * Constructs a vulkan descriptor buffer info which can be used to specify
-     * and reference the underlying buffer component of the tensor without
-     * exposing it.
+     * Adds this object to a Vulkan descriptor set at \p binding.
      *
-     * @return Descriptor buffer info with own buffer
+     * @param descriptorSet The descriptor set to add to.
+     * @param binding The binding number to use.
+     * @return Add this object to a descriptor set at \p binding.
      */
-    vk::DescriptorBufferInfo constructDescriptorBufferInfo();
-
-    /**
-     * Returns the size/magnitude of the Tensor, which will be the total number
-     * of elements across all dimensions
-     *
-     * @return Unsigned integer representing the total number of elements
-     */
-    uint32_t size();
-
-    /**
-     * Returns the total size of a single element of the respective data type
-     * that this tensor holds.
-     *
-     * @return Unsigned integer representing the memory of a single element of
-     * the respective data type.
-     */
-    uint32_t dataTypeMemorySize();
-
-    /**
-     * Returns the total memory size of the data contained by the Tensor object
-     * which would equate to (this->size() * this->dataTypeMemorySize())
-     *
-     * @return Unsigned integer representing the memory of a single element of
-     * the respective data type.
-     */
-    uint32_t memorySize();
+    vk::WriteDescriptorSet constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding);
 
     /**
      * Retrieve the data type of the tensor (host, device, storage)
@@ -204,54 +159,9 @@ class Tensor
      */
     TensorDataTypes dataType();
 
-    /**
-     * Retrieve the raw data via the pointer to the memory that contains the raw
-     * memory of this current tensor. This tensor gets changed to a nullptr when
-     * the Tensor is removed.
-     *
-     * @return Pointer to raw memory containing raw bytes data of Tensor.
-     */
-    void* rawData();
-
-    /**
-     * Sets / resets the data of the tensor which is directly done on the GPU
-     * host visible memory available by the tensor.
-     */
-    void setRawData(const void* data);
-
-    /**
-     * Template to return the pointer data converted by specific type, which
-     * would be any of the supported types including float, double, int32,
-     * uint32 and bool.
-     *
-     * @return Pointer to raw memory containing raw bytes data of Tensor.
-     */
-    template<typename T>
-    T* data()
-    {
-        return (T*)this->mRawData;
-    }
-
-    /**
-     * Template to get the data of the current tensor as a vector of specific
-     * type, which would be any of the supported types including float, double,
-     * int32, uint32 and bool.
-     *
-     * @return Vector of type provided by template.
-     */
-    template<typename T>
-    std::vector<T> vector()
-    {
-        return { (T*)this->mRawData, ((T*)this->mRawData) + this->size() };
-    }
-
   protected:
     // -------------- ALWAYS OWNED RESOURCES
-    TensorTypes mTensorType;
     TensorDataTypes mDataType;
-    uint32_t mSize;
-    uint32_t mDataTypeMemorySize;
-    void* mRawData;
 
   private:
     // -------------- NEVER OWNED RESOURCES
@@ -294,6 +204,8 @@ class Tensor
 
     void mapRawData();
     void unmapRawData();
+
+    vk::DescriptorBufferInfo constructDescriptorBufferInfo();
 };
 
 template<typename T>
@@ -304,7 +216,7 @@ class TensorT : public Tensor
     TensorT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
             std::shared_ptr<vk::Device> device,
             const std::vector<T>& data,
-            const TensorTypes& tensorType = TensorTypes::eDevice)
+            const MemoryTypes& tensorType = MemoryTypes::eDevice)
       : Tensor(physicalDevice,
                device,
                (void*)data.data(),

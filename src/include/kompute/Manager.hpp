@@ -82,7 +82,7 @@ class Manager
     template<typename T>
     std::shared_ptr<TensorT<T>> tensorT(
       const std::vector<T>& data,
-      Tensor::TensorTypes tensorType = Tensor::TensorTypes::eDevice)
+      Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
     {
         KP_LOG_DEBUG("Kompute Manager tensor creation triggered");
 
@@ -98,7 +98,7 @@ class Manager
 
     std::shared_ptr<TensorT<float>> tensor(
       const std::vector<float>& data,
-      Tensor::TensorTypes tensorType = Tensor::TensorTypes::eDevice)
+      Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
     {
         return this->tensorT<float>(data, tensorType);
     }
@@ -108,7 +108,7 @@ class Manager
       uint32_t elementTotalCount,
       uint32_t elementMemorySize,
       const Tensor::TensorDataTypes& dataType,
-      Tensor::TensorTypes tensorType = Tensor::TensorTypes::eDevice)
+      Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
     {
         std::shared_ptr<Tensor> tensor{ new kp::Tensor(this->mPhysicalDevice,
                                                        this->mDevice,
@@ -139,7 +139,7 @@ class Manager
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
         KP_LOG_DEBUG("Kompute Manager image creation triggered");
 
@@ -164,7 +164,7 @@ class Manager
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
         return this->imageT<float>(data, width, height, numChannels, imageType);
     }
@@ -175,7 +175,7 @@ class Manager
       uint32_t height,
       uint32_t numChannels,
       const Image::ImageDataTypes& dataType,
-      Image::ImageTypes imageType = Image::ImageTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
         std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
                                                     this->mDevice,
@@ -198,7 +198,7 @@ class Manager
      * objects which provides default types to the push and spec constants as
      * floats.
      *
-     * @param tensors (optional) The tensors to initialise the algorithm with
+     * @param memObjects (optional) The mem objects to initialise the algorithm with
      * @param spirv (optional) The SPIRV bytes for the algorithm to dispatch
      * @param workgroup (optional) kp::Workgroup for algorithm to use, and
      * defaults to (tensor[0].size(), 1, 1)
@@ -209,21 +209,21 @@ class Manager
      * @returns Shared pointer with initialised algorithm
      */
     std::shared_ptr<Algorithm> algorithm(
-      const std::vector<std::shared_ptr<Tensor>>& tensors = {},
+      const std::vector<std::shared_ptr<Memory>>& memObjects = {},
       const std::vector<uint32_t>& spirv = {},
       const Workgroup& workgroup = {},
       const std::vector<float>& specializationConstants = {},
       const std::vector<float>& pushConstants = {})
     {
         return this->algorithm<>(
-          tensors, spirv, workgroup, specializationConstants, pushConstants);
+          memObjects, spirv, workgroup, specializationConstants, pushConstants);
     }
 
     /**
      * Create a managed algorithm that will be destroyed by this manager
      * if it hasn't been destroyed by its reference count going to zero.
      *
-     * @param tensors (optional) The tensors to initialise the algorithm with
+     * @param memObjects (optional) The mem objects to initialise the algorithm with
      * @param spirv (optional) The SPIRV bytes for the algorithm to dispatch
      * @param workgroup (optional) kp::Workgroup for algorithm to use, and
      * defaults to (tensor[0].size(), 1, 1)
@@ -235,7 +235,7 @@ class Manager
      */
     template<typename S = float, typename P = float>
     std::shared_ptr<Algorithm> algorithm(
-      const std::vector<std::shared_ptr<Tensor>>& tensors,
+      const std::vector<std::shared_ptr<Memory>>& memObjects,
       const std::vector<uint32_t>& spirv,
       const Workgroup& workgroup,
       const std::vector<S>& specializationConstants,
@@ -246,7 +246,7 @@ class Manager
 
         std::shared_ptr<Algorithm> algorithm{ new kp::Algorithm(
           this->mDevice,
-          tensors,
+          memObjects,
           spirv,
           workgroup,
           specializationConstants,

@@ -29,21 +29,6 @@ Image::toString(Image::ImageDataTypes dt)
     }
 }
 
-std::string
-Image::toString(Image::ImageTypes dt)
-{
-    switch (dt) {
-        case ImageTypes::eDevice:
-            return "eDevice";
-        case ImageTypes::eHost:
-            return "eHost";
-        case ImageTypes::eStorage:
-            return "eStorage";
-        default:
-            return "unknown";
-    }
-}
-
 Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
              std::shared_ptr<vk::Device> device,
              void* data,
@@ -51,13 +36,13 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
              uint32_t height,
              uint32_t numChannels,
              const ImageDataTypes& dataType,
-             const ImageTypes& ImageType)
+             const MemoryTypes& memoryType)
 {
     KP_LOG_DEBUG(
       "Kompute Image constructor data width: {}, height: {}, and type: {}",
       width,
       height,
-      Image::toString(ImageType));
+      Memory::toString(memoryType));
 
     if (!data || width == 0 || height == 0 || numChannels == 0) {
         throw std::runtime_error(
@@ -67,7 +52,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
     this->mDataType = dataType;
-    this->mImageType = ImageType;
+    this->mMemoryType = memoryType;
     this->mWidth = width;
     this->mHeight = height;
     this->mNumChannels = numChannels;
@@ -78,7 +63,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
 Image::~Image()
 {
     KP_LOG_DEBUG("Kompute Image destructor started. Type: {}",
-                 Image::toString(this->ImageType()));
+                 Memory::toString(this->memoryType()));
 
     if (this->mDevice) {
         this->destroy();
@@ -105,16 +90,10 @@ Image::rebuild(void* data)
     this->mDataTypeMemorySize = elementTypeSize(this->mDataType);
     this->allocateMemoryCreateGPUResources();
 
-    if (this->ImageType() != Image::ImageTypes::eStorage) {
+    if (this->memoryType() != Image::MemoryTypes::eStorage) {
         this->mapRawData();
         memcpy(this->mRawData, data, this->memorySize());
     }
-}
-
-Image::ImageTypes
-Image::ImageType()
-{
-    return this->mImageType;
 }
 
 bool
@@ -124,40 +103,10 @@ Image::isInit()
            this->mRawData;
 }
 
-uint32_t
-Image::size()
-{
-    return this->mSize;
-}
-
-uint32_t
-Image::dataTypeMemorySize()
-{
-    return this->mDataTypeMemorySize;
-}
-
-uint32_t
-Image::memorySize()
-{
-    return this->mSize * this->mDataTypeMemorySize;
-}
-
 kp::Image::ImageDataTypes
 Image::dataType()
 {
     return this->mDataType;
-}
-
-void*
-Image::rawData()
-{
-    return this->mRawData;
-}
-
-void
-Image::setRawData(const void* data)
-{
-    memcpy(this->mRawData, data, this->memorySize());
 }
 
 void
@@ -168,13 +117,13 @@ Image::mapRawData()
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
 
-    if (this->mImageType == ImageTypes::eHost) {
+    if (this->mMemoryType == MemoryTypes::eHost) {
         hostVisibleMemory = this->mPrimaryMemory;
-    } else if (this->mImageType == ImageTypes::eDevice) {
+    } else if (this->mMemoryType == MemoryTypes::eDevice) {
         hostVisibleMemory = this->mStagingMemory;
     } else {
         KP_LOG_WARN("Kompute Image mapping data not supported on {} Image",
-                    toString(this->ImageType()));
+                    Memory::toString(this->memoryType()));
         return;
     }
 
@@ -194,13 +143,13 @@ Image::unmapRawData()
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
 
-    if (this->mImageType == ImageTypes::eHost) {
+    if (this->mMemoryType == MemoryTypes::eHost) {
         hostVisibleMemory = this->mPrimaryMemory;
-    } else if (this->mImageType == ImageTypes::eDevice) {
+    } else if (this->mMemoryType == MemoryTypes::eDevice) {
         hostVisibleMemory = this->mStagingMemory;
     } else {
         KP_LOG_WARN("Kompute Image mapping data not supported on {} Image",
-                    toString(this->ImageType()));
+                    Memory::toString(this->memoryType()));
         return;
     }
 
@@ -280,7 +229,7 @@ Image::recordCopyImage(const vk::CommandBuffer& commandBuffer,
 }
 
 void
-Image::recordPrimaryImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
+Image::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                        vk::AccessFlagBits srcAccessMask,
                                        vk::AccessFlagBits dstAccessMask,
                                        vk::PipelineStageFlagBits srcStageMask,
@@ -297,7 +246,7 @@ Image::recordPrimaryImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
 }
 
 void
-Image::recordStagingImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
+Image::recordStagingMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                        vk::AccessFlagBits srcAccessMask,
                                        vk::AccessFlagBits dstAccessMask,
                                        vk::PipelineStageFlagBits srcStageMask,
@@ -313,6 +262,7 @@ Image::recordStagingImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                    dstStageMask);
 }
 
+// FIXME: Make this private.
 void
 Image::recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                 const vk::Image& image,
@@ -359,21 +309,38 @@ Image::constructDescriptorImageInfo()
     return descriptorInfo;
 }
 
+vk::WriteDescriptorSet
+Image::constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding)
+{
+    KP_LOG_DEBUG("Kompute Image construct descriptor set for binding {}", binding);
+
+    vk::DescriptorImageInfo descriptorImageInfo =
+          this->constructDescriptorImageInfo();
+
+    return vk::WriteDescriptorSet(descriptorSet,
+                                 binding, // Destination binding
+                                 0, // Destination array element
+                                 1, // Descriptor count
+                                 vk::DescriptorType::eStorageBuffer,
+                                 &descriptorImageInfo,
+                                 nullptr); // Descriptor buffer info
+}
+
 vk::ImageUsageFlags
 Image::getPrimaryImageUsageFlags()
 {
-    switch (this->mImageType) {
-        case ImageTypes::eDevice:
+    switch (this->mMemoryType) {
+        case MemoryTypes::eDevice:
             return vk::ImageUsageFlagBits::eStorage |
                    vk::ImageUsageFlagBits::eTransferSrc |
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
-        case ImageTypes::eHost:
+        case MemoryTypes::eHost:
             return vk::ImageUsageFlagBits::eStorage |
                    vk::ImageUsageFlagBits::eTransferSrc |
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
-        case ImageTypes::eStorage:
+        case MemoryTypes::eStorage:
             return vk::ImageUsageFlagBits::eStorage;
             break;
         default:
@@ -384,15 +351,15 @@ Image::getPrimaryImageUsageFlags()
 vk::MemoryPropertyFlags
 Image::getPrimaryMemoryPropertyFlags()
 {
-    switch (this->mImageType) {
-        case ImageTypes::eDevice:
+    switch (this->mMemoryType) {
+        case MemoryTypes::eDevice:
             return vk::MemoryPropertyFlagBits::eDeviceLocal;
             break;
-        case ImageTypes::eHost:
+        case MemoryTypes::eHost:
             return vk::MemoryPropertyFlagBits::eHostVisible |
                    vk::MemoryPropertyFlagBits::eHostCoherent;
             break;
-        case ImageTypes::eStorage:
+        case MemoryTypes::eStorage:
             return vk::MemoryPropertyFlagBits::eDeviceLocal;
             break;
         default:
@@ -403,8 +370,8 @@ Image::getPrimaryMemoryPropertyFlags()
 vk::ImageUsageFlags
 Image::getStagingImageUsageFlags()
 {
-    switch (this->mImageType) {
-        case ImageTypes::eDevice:
+    switch (this->mMemoryType) {
+        case MemoryTypes::eDevice:
             return vk::ImageUsageFlagBits::eTransferSrc |
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
@@ -416,8 +383,8 @@ Image::getStagingImageUsageFlags()
 vk::MemoryPropertyFlags
 Image::getStagingMemoryPropertyFlags()
 {
-    switch (this->mImageType) {
-        case ImageTypes::eDevice:
+    switch (this->mMemoryType) {
+        case MemoryTypes::eDevice:
             return vk::MemoryPropertyFlagBits::eHostVisible |
                    vk::MemoryPropertyFlagBits::eHostCoherent;
             break;
@@ -449,7 +416,7 @@ Image::allocateMemoryCreateGPUResources()
                              this->getPrimaryMemoryPropertyFlags());
     this->mFreePrimaryMemory = true;
 
-    if (this->mImageType == ImageTypes::eDevice) {
+    if (this->mMemoryType == MemoryTypes::eDevice) {
         KP_LOG_DEBUG("Kompute Image creating staging image and memory");
 
         this->mStagingImage = std::make_shared<vk::Image>();
@@ -560,7 +527,7 @@ Image::destroy()
     }
 
     // Unmap the current memory data
-    if (this->ImageType() != Image::ImageTypes::eStorage) {
+    if (this->memoryType() != Image::MemoryTypes::eStorage) {
         this->unmapRawData();
     }
 
