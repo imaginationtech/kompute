@@ -35,18 +35,18 @@ OpMemoryBarrier::record(const vk::CommandBuffer& commandBuffer)
     if (this->mBarrierOnPrimary) {
         for (const std::shared_ptr<Memory>& tensor : this->mMemObjects) {
             tensor->recordPrimaryMemoryBarrier(commandBuffer,
-                                                     this->mSrcAccessMask,
-                                                     this->mDstAccessMask,
-                                                     this->mSrcStageMask,
-                                                     this->mDstStageMask);
+                                               this->mSrcAccessMask,
+                                               this->mDstAccessMask,
+                                               this->mSrcStageMask,
+                                               this->mDstStageMask);
         }
     } else {
         for (const std::shared_ptr<Memory>& tensor : this->mMemObjects) {
             tensor->recordStagingMemoryBarrier(commandBuffer,
-                                                     this->mSrcAccessMask,
-                                                     this->mDstAccessMask,
-                                                     this->mSrcStageMask,
-                                                     this->mDstStageMask);
+                                               this->mSrcAccessMask,
+                                               this->mDstAccessMask,
+                                               this->mSrcStageMask,
+                                               this->mDstStageMask);
         }
     }
 }

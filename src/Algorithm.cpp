@@ -185,7 +185,8 @@ Algorithm::createParameters()
         std::vector<vk::WriteDescriptorSet> computeWriteDescriptorSets;
 
         vk::WriteDescriptorSet descriptorSet =
-          this->mMemObjects[i]->constructDescriptorSet(*this->mDescriptorSet, i);
+          this->mMemObjects[i]->constructDescriptorSet(*this->mDescriptorSet,
+                                                       i);
 
         computeWriteDescriptorSets.push_back(descriptorSet);
 

@@ -22,17 +22,13 @@ TEST(TestLogisticRegression, TestMainLogisticRegression)
         std::shared_ptr<kp::Memory> y = mgr.tensor({ 0, 0, 0, 1, 1 });
 
         std::shared_ptr<kp::Memory> wIn = mgr.tensor({ 0.001, 0.001 });
-        std::shared_ptr<kp::Memory> wOutI =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
-        std::shared_ptr<kp::Memory> wOutJ =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> wOutI = mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> wOutJ = mgr.tensor({ 0, 0, 0, 0, 0 });
 
         std::shared_ptr<kp::Memory> bIn = mgr.tensor({ 0 });
-        std::shared_ptr<kp::Memory> bOut =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> bOut = mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::shared_ptr<kp::Memory> lOut =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> lOut = mgr.tensor({ 0, 0, 0, 0, 0 });
 
         std::vector<std::shared_ptr<kp::Memory>> params = { xI,  xJ,    y,
                                                             wIn, wOutI, wOutJ,
@@ -98,18 +94,14 @@ TEST(TestLogisticRegression, TestMainLogisticRegressionManualCopy)
 
         std::shared_ptr<kp::Memory> wIn =
           mgr.tensor({ 0.001, 0.001 }, kp::Memory::MemoryTypes::eHost);
-        std::shared_ptr<kp::Memory> wOutI =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
-        std::shared_ptr<kp::Memory> wOutJ =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> wOutI = mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> wOutJ = mgr.tensor({ 0, 0, 0, 0, 0 });
 
         std::shared_ptr<kp::Memory> bIn =
           mgr.tensor({ 0 }, kp::Memory::MemoryTypes::eHost);
-        std::shared_ptr<kp::Memory> bOut =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> bOut = mgr.tensor({ 0, 0, 0, 0, 0 });
 
-        std::shared_ptr<kp::Memory> lOut =
-          mgr.tensor({ 0, 0, 0, 0, 0 });
+        std::shared_ptr<kp::Memory> lOut = mgr.tensor({ 0, 0, 0, 0, 0 });
 
         std::vector<std::shared_ptr<kp::Memory>> params = { xI,  xJ,    y,
                                                             wIn, wOutI, wOutJ,

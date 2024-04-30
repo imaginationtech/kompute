@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
+#include "Memory.hpp"
 #include "kompute/Core.hpp"
 #include "logger/Logger.hpp"
-#include "Memory.hpp"
 #include <memory>
 #include <string>
 
@@ -119,12 +119,11 @@ class Tensor : public Memory
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordPrimaryMemoryBarrier(
-      const vk::CommandBuffer& commandBuffer,
-      vk::AccessFlagBits srcAccessMask,
-      vk::AccessFlagBits dstAccessMask,
-      vk::PipelineStageFlagBits srcStageMask,
-      vk::PipelineStageFlagBits dstStageMask);
+    void recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
+                                    vk::AccessFlagBits srcAccessMask,
+                                    vk::AccessFlagBits dstAccessMask,
+                                    vk::PipelineStageFlagBits srcStageMask,
+                                    vk::PipelineStageFlagBits dstStageMask);
     /**
      * Records the memory barrier into the staging buffer and command
      * buffer which ensures that relevant data transfers are carried out
@@ -136,12 +135,11 @@ class Tensor : public Memory
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordStagingMemoryBarrier(
-      const vk::CommandBuffer& commandBuffer,
-      vk::AccessFlagBits srcAccessMask,
-      vk::AccessFlagBits dstAccessMask,
-      vk::PipelineStageFlagBits srcStageMask,
-      vk::PipelineStageFlagBits dstStageMask);
+    void recordStagingMemoryBarrier(const vk::CommandBuffer& commandBuffer,
+                                    vk::AccessFlagBits srcAccessMask,
+                                    vk::AccessFlagBits dstAccessMask,
+                                    vk::PipelineStageFlagBits srcStageMask,
+                                    vk::PipelineStageFlagBits dstStageMask);
 
     /**
      * Adds this object to a Vulkan descriptor set at \p binding.
@@ -150,7 +148,9 @@ class Tensor : public Memory
      * @param binding The binding number to use.
      * @return Add this object to a descriptor set at \p binding.
      */
-    vk::WriteDescriptorSet constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding);
+    vk::WriteDescriptorSet constructDescriptorSet(
+      vk::DescriptorSet descriptorSet,
+      uint32_t binding);
 
     /**
      * Retrieve the data type of the tensor (host, device, storage)

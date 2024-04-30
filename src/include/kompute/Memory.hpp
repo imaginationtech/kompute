@@ -8,11 +8,14 @@
 
 namespace kp {
 
-class Memory {
+class Memory
+{
     // This is the base class for Tensors and Images.
-    // It's required so that algorithms and sequences can mix tensors and images.
-    // FIXME: Common-ise lots of the code that is the same between images and tensors into this base class.
-public:
+    // It's required so that algorithms and sequences can mix tensors and
+    // images.
+    // FIXME: Common-ise lots of the code that is the same between images and
+    // tensors into this base class.
+  public:
     /**
      * Type for memory created: Device allows memory to be transferred from
      * staging memory. Staging are host memory visible. Storage are device
@@ -32,7 +35,7 @@ public:
      * Destructor which is in charge of freeing vulkan resources unless they
      * have been provided externally.
      */
-    virtual ~Memory() {};
+    virtual ~Memory(){};
 
     /**
      * Retrieve the image type of the image
@@ -42,20 +45,22 @@ public:
     MemoryTypes memoryType();
 
     /**
-     * Check whether tensor/image is initialized based on the created gpu resources.
+     * Check whether tensor/image is initialized based on the created gpu
+     * resources.
      *
      * @returns Boolean stating whether tensor is initialized
      */
     virtual bool isInit() = 0;
 
-        /**
+    /**
      * Records a copy from the internal staging memory to the device memory
      * using an optional barrier to wait for the operation. This function would
      * only be relevant for kp::Tensors of type eDevice.
      *
      * @param commandBuffer Vulkan Command Buffer to record the commands into
      */
-    virtual void recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer) = 0;
+    virtual void recordCopyFromStagingToDevice(
+      const vk::CommandBuffer& commandBuffer) = 0;
 
     /**
      * Records a copy from the internal device memory to the staging memory
@@ -64,7 +69,8 @@ public:
      *
      * @param commandBuffer Vulkan Command Buffer to record the commands into
      */
-    virtual void  recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer) = 0;
+    virtual void recordCopyFromDeviceToStaging(
+      const vk::CommandBuffer& commandBuffer) = 0;
     /**
      * Records the buffer memory barrier into the primary buffer and command
      * buffer which ensures that relevant data transfers are carried out
@@ -107,11 +113,13 @@ public:
      * @param binding The binding number to use.
      * @return Add this object to a descriptor set at \p binding.
      */
-    virtual vk::WriteDescriptorSet constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding) = 0;
+    virtual vk::WriteDescriptorSet constructDescriptorSet(
+      vk::DescriptorSet descriptorSet,
+      uint32_t binding) = 0;
 
     /**
-     * Returns the size/magnitude of the Tensor/Image, which will be the total number
-     * of elements across all dimensions
+     * Returns the size/magnitude of the Tensor/Image, which will be the total
+     * number of elements across all dimensions
      *
      * @return Unsigned integer representing the total number of elements
      */
@@ -145,8 +153,8 @@ public:
     void* rawData();
 
     /**
-     * Sets / resets the data of the tensor/image which is directly done on the GPU
-     * host visible memory available by the tensor.
+     * Sets / resets the data of the tensor/image which is directly done on the
+     * GPU host visible memory available by the tensor.
      */
     void setRawData(const void* data);
 
@@ -169,15 +177,12 @@ public:
      * @return Pointer to raw memory containing raw bytes data of Tensor/Image.
      * This is the default, for convenience.
      */
-    float* data()
-    {
-        return this->data<float>();
-    }
+    float* data() { return this->data<float>(); }
 
     /**
-     * Template to get the data of the current tensor/image as a vector of specific
-     * type, which would be any of the supported types including float, double,
-     * int32, uint32 and bool.
+     * Template to get the data of the current tensor/image as a vector of
+     * specific type, which would be any of the supported types including float,
+     * double, int32, uint32 and bool.
      *
      * @return Vector of type provided by template.
      */
@@ -193,12 +198,9 @@ public:
      *
      * @return Vector of floats.
      */
-    std::vector<float> vector()
-    {
-        return this->vector<float>();
-    }
+    std::vector<float> vector() { return this->vector<float>(); }
 
-protected:
+  protected:
     // -------------- ALWAYS OWNED RESOURCES
     MemoryTypes mMemoryType;
     uint32_t mSize;
@@ -207,4 +209,3 @@ protected:
 };
 
 } // End namespace kp
-

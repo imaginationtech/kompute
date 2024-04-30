@@ -14,8 +14,7 @@ OpImageSyncDevice::OpImageSyncDevice(
           "Kompute OpImageSyncDevice called with less than 1 image");
     }
 
-    for(std::shared_ptr<Memory> image : images)
-    {
+    for (std::shared_ptr<Memory> image : images) {
         this->mImages.push_back(std::dynamic_pointer_cast<Image>(image));
     }
 }
