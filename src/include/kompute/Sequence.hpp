@@ -63,7 +63,8 @@ class Sequence : public std::enable_shared_from_this<Sequence>
       std::vector<std::shared_ptr<Memory>> memObjects,
       TArgs&&... params)
     {
-        std::shared_ptr<T> op{ new T(memObjects, std::forward<TArgs>(params)...) };
+        std::shared_ptr<T> op{ new T(memObjects,
+                                     std::forward<TArgs>(params)...) };
         return this->record(op);
     }
     /**
@@ -114,10 +115,12 @@ class Sequence : public std::enable_shared_from_this<Sequence>
      * @return shared_ptr<Sequence> of the Sequence class itself
      */
     template<typename T, typename... TArgs>
-    std::shared_ptr<Sequence> eval(std::vector<std::shared_ptr<Memory>> memObjects,
-                                   TArgs&&... params)
+    std::shared_ptr<Sequence> eval(
+      std::vector<std::shared_ptr<Memory>> memObjects,
+      TArgs&&... params)
     {
-        std::shared_ptr<T> op{ new T(memObjects, std::forward<TArgs>(params)...) };
+        std::shared_ptr<T> op{ new T(memObjects,
+                                     std::forward<TArgs>(params)...) };
         return this->eval(op);
     }
     /**
@@ -171,7 +174,8 @@ class Sequence : public std::enable_shared_from_this<Sequence>
       std::vector<std::shared_ptr<Memory>> memObjects,
       TArgs&&... params)
     {
-        std::shared_ptr<T> op{ new T(memObjects, std::forward<TArgs>(params)...) };
+        std::shared_ptr<T> op{ new T(memObjects,
+                                     std::forward<TArgs>(params)...) };
         return this->evalAsync(op);
     }
     /**

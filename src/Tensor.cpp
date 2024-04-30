@@ -202,10 +202,10 @@ Tensor::recordCopyBuffer(const vk::CommandBuffer& commandBuffer,
 
 void
 Tensor::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                         vk::AccessFlagBits srcAccessMask,
-                                         vk::AccessFlagBits dstAccessMask,
-                                         vk::PipelineStageFlagBits srcStageMask,
-                                         vk::PipelineStageFlagBits dstStageMask)
+                                   vk::AccessFlagBits srcAccessMask,
+                                   vk::AccessFlagBits dstAccessMask,
+                                   vk::PipelineStageFlagBits srcStageMask,
+                                   vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Tensor recording PRIMARY buffer memory barrier");
 
@@ -219,10 +219,10 @@ Tensor::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
 
 void
 Tensor::recordStagingMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                         vk::AccessFlagBits srcAccessMask,
-                                         vk::AccessFlagBits dstAccessMask,
-                                         vk::PipelineStageFlagBits srcStageMask,
-                                         vk::PipelineStageFlagBits dstStageMask)
+                                   vk::AccessFlagBits srcAccessMask,
+                                   vk::AccessFlagBits dstAccessMask,
+                                   vk::PipelineStageFlagBits srcStageMask,
+                                   vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Tensor recording STAGING buffer memory barrier");
 
@@ -275,20 +275,22 @@ Tensor::constructDescriptorBufferInfo()
 }
 
 vk::WriteDescriptorSet
-Tensor::constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding)
+Tensor::constructDescriptorSet(vk::DescriptorSet descriptorSet,
+                               uint32_t binding)
 {
-    KP_LOG_DEBUG("Kompute Tensor construct descriptor set for binding {}", binding);
+    KP_LOG_DEBUG("Kompute Tensor construct descriptor set for binding {}",
+                 binding);
 
     vk::DescriptorBufferInfo descriptorBufferInfo =
-          this->constructDescriptorBufferInfo();
+      this->constructDescriptorBufferInfo();
 
     return vk::WriteDescriptorSet(descriptorSet,
-                                 binding, // Destination binding
-                                 0, // Destination array element
-                                 1, // Descriptor count
-                                 vk::DescriptorType::eStorageBuffer,
-                                 nullptr, // Descriptor image info
-                                 &descriptorBufferInfo);
+                                  binding, // Destination binding
+                                  0,       // Destination array element
+                                  1,       // Descriptor count
+                                  vk::DescriptorType::eStorageBuffer,
+                                  nullptr, // Descriptor image info
+                                  &descriptorBufferInfo);
 }
 
 vk::BufferUsageFlags

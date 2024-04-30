@@ -14,8 +14,7 @@ OpImageCopy::OpImageCopy(const std::vector<std::shared_ptr<Memory>>& images)
           "Kompute OpImageCopy called with less than 2 images");
     }
 
-    for(std::shared_ptr<Memory> image : images)
-    {
+    for (std::shared_ptr<Memory> image : images) {
         this->mImages.push_back(std::dynamic_pointer_cast<Image>(image));
     }
 
@@ -74,8 +73,7 @@ OpImageCopy::postEval(const vk::CommandBuffer& /*commandBuffer*/)
 
     // Copy the data from the first image into all the images
     for (size_t i = 1; i < this->mImages.size(); i++) {
-        if (this->mImages[i]->memoryType() ==
-            Memory::MemoryTypes::eStorage) {
+        if (this->mImages[i]->memoryType() == Memory::MemoryTypes::eStorage) {
             KP_LOG_DEBUG("Kompute OpImageCopy not copying to image dest "
                          "given it's of eStorage type");
             continue;

@@ -9,8 +9,7 @@ OpTensorCopy::OpTensorCopy(const std::vector<std::shared_ptr<Memory>>& tensors)
 {
     KP_LOG_DEBUG("Kompute OpTensorCopy constructor with params");
 
-    for(std::shared_ptr<Memory> tensor : tensors)
-    {
+    for (std::shared_ptr<Memory> tensor : tensors) {
         this->mTensors.push_back(std::dynamic_pointer_cast<Tensor>(tensor));
     }
 

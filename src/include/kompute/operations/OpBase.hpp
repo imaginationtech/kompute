@@ -3,8 +3,8 @@
 
 #include "kompute/Algorithm.hpp"
 #include "kompute/Core.hpp"
-#include "kompute/Tensor.hpp"
 #include "kompute/Image.hpp"
+#include "kompute/Tensor.hpp"
 
 namespace kp {
 

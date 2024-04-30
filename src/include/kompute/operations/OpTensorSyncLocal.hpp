@@ -10,8 +10,8 @@
 namespace kp {
 
 /**
- * Operation that syncs mem object's local memory by mapping device data into the
- * local CPU memory. For MemoryTypes::eDevice it will use a record operation
+ * Operation that syncs mem object's local memory by mapping device data into
+ * the local CPU memory. For MemoryTypes::eDevice it will use a record operation
  * for the memory to be syncd into GPU memory which means that the operation
  * will be done in sync with GPU commands. For MemoryTypes::eHost it will
  * only map the data into host memory which will happen during preEval before

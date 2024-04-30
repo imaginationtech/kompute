@@ -230,10 +230,10 @@ Image::recordCopyImage(const vk::CommandBuffer& commandBuffer,
 
 void
 Image::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                       vk::AccessFlagBits srcAccessMask,
-                                       vk::AccessFlagBits dstAccessMask,
-                                       vk::PipelineStageFlagBits srcStageMask,
-                                       vk::PipelineStageFlagBits dstStageMask)
+                                  vk::AccessFlagBits srcAccessMask,
+                                  vk::AccessFlagBits dstAccessMask,
+                                  vk::PipelineStageFlagBits srcStageMask,
+                                  vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Image recording PRIMARY image memory barrier");
 
@@ -247,10 +247,10 @@ Image::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
 
 void
 Image::recordStagingMemoryBarrier(const vk::CommandBuffer& commandBuffer,
-                                       vk::AccessFlagBits srcAccessMask,
-                                       vk::AccessFlagBits dstAccessMask,
-                                       vk::PipelineStageFlagBits srcStageMask,
-                                       vk::PipelineStageFlagBits dstStageMask)
+                                  vk::AccessFlagBits srcAccessMask,
+                                  vk::AccessFlagBits dstAccessMask,
+                                  vk::PipelineStageFlagBits srcStageMask,
+                                  vk::PipelineStageFlagBits dstStageMask)
 {
     KP_LOG_DEBUG("Kompute Image recording STAGING image memory barrier");
 
@@ -312,18 +312,19 @@ Image::constructDescriptorImageInfo()
 vk::WriteDescriptorSet
 Image::constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding)
 {
-    KP_LOG_DEBUG("Kompute Image construct descriptor set for binding {}", binding);
+    KP_LOG_DEBUG("Kompute Image construct descriptor set for binding {}",
+                 binding);
 
     vk::DescriptorImageInfo descriptorImageInfo =
-          this->constructDescriptorImageInfo();
+      this->constructDescriptorImageInfo();
 
     return vk::WriteDescriptorSet(descriptorSet,
-                                 binding, // Destination binding
-                                 0, // Destination array element
-                                 1, // Descriptor count
-                                 vk::DescriptorType::eStorageBuffer,
-                                 &descriptorImageInfo,
-                                 nullptr); // Descriptor buffer info
+                                  binding, // Destination binding
+                                  0,       // Destination array element
+                                  1,       // Descriptor count
+                                  vk::DescriptorType::eStorageBuffer,
+                                  &descriptorImageInfo,
+                                  nullptr); // Descriptor buffer info
 }
 
 vk::ImageUsageFlags

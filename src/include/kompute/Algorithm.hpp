@@ -122,7 +122,8 @@ class Algorithm
         }
 
         this->setWorkgroup(
-          workgroup, this->mMemObjects.size() ? this->mMemObjects[0]->size() : 1);
+          workgroup,
+          this->mMemObjects.size() ? this->mMemObjects[0]->size() : 1);
 
         // Descriptor pool is created first so if available then destroy all
         // before rebuild

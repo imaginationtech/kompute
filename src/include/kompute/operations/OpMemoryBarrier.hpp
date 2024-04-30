@@ -19,9 +19,9 @@ class OpMemoryBarrier : public OpBase
 {
   public:
     /**
-     * Constructor that stores mem objects as well as memory barrier parameters to
-     * be used to create a pipeline barrier on the respective primary or staging
-     * tensor.
+     * Constructor that stores mem objects as well as memory barrier parameters
+     * to be used to create a pipeline barrier on the respective primary or
+     * staging tensor.
      *
      * @param memObjects The mem objects to apply the memory barriers on
      * @param srcAccessMask The kp::AccessFlagBits for the source access mask

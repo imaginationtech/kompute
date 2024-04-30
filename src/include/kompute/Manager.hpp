@@ -198,7 +198,8 @@ class Manager
      * objects which provides default types to the push and spec constants as
      * floats.
      *
-     * @param memObjects (optional) The mem objects to initialise the algorithm with
+     * @param memObjects (optional) The mem objects to initialise the algorithm
+     * with
      * @param spirv (optional) The SPIRV bytes for the algorithm to dispatch
      * @param workgroup (optional) kp::Workgroup for algorithm to use, and
      * defaults to (tensor[0].size(), 1, 1)
@@ -223,7 +224,8 @@ class Manager
      * Create a managed algorithm that will be destroyed by this manager
      * if it hasn't been destroyed by its reference count going to zero.
      *
-     * @param memObjects (optional) The mem objects to initialise the algorithm with
+     * @param memObjects (optional) The mem objects to initialise the algorithm
+     * with
      * @param spirv (optional) The SPIRV bytes for the algorithm to dispatch
      * @param workgroup (optional) kp::Workgroup for algorithm to use, and
      * defaults to (tensor[0].size(), 1, 1)
