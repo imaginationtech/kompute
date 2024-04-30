@@ -15,8 +15,8 @@ TEST(TestOpTensorCopy, CopyDeviceToDeviceTensor)
     std::vector<float> testVecA{ 1, 2, 3 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::TensorT<float>> tensorB = mgr.tensor(testVecB);
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
+    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(testVecB);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(tensorB->isInit());
@@ -39,9 +39,9 @@ TEST(TestOpTensorCopy, CopyDeviceToDeviceTensorMulti)
     std::vector<float> testVecB{ 0, 0, 0 };
     std::vector<float> testVecC{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::TensorT<float>> tensorB = mgr.tensor(testVecB);
-    std::shared_ptr<kp::TensorT<float>> tensorC = mgr.tensor(testVecC);
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
+    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(testVecB);
+    std::shared_ptr<kp::Memory> tensorC = mgr.tensor(testVecC);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(tensorB->isInit());
@@ -69,9 +69,9 @@ TEST(TestOpTensorCopy, CopyDeviceToHostTensor)
     std::vector<float> testVecA{ 3, 4, 5 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::TensorT<float>> tensorB =
-      mgr.tensor(testVecB, kp::Tensor::TensorTypes::eHost);
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
+    std::shared_ptr<kp::Memory> tensorB =
+      mgr.tensor(testVecB, kp::Memory::MemoryTypes::eHost);
 
     //  Only calling sync on device type tensor
     mgr.sequence()->eval<kp::OpTensorSyncDevice>({ tensorA });
@@ -96,9 +96,9 @@ TEST(TestOpTensorCopy, CopyHostToDeviceTensor)
     std::vector<float> testVecA{ 4, 5, 6 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA =
-      mgr.tensor(testVecA, kp::Tensor::TensorTypes::eHost);
-    std::shared_ptr<kp::TensorT<float>> tensorB = mgr.tensor(testVecB);
+    std::shared_ptr<kp::Memory> tensorA =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(testVecB);
 
     //  Only calling sync on device type tensor
     mgr.sequence()->eval<kp::OpTensorSyncDevice>({ tensorA, tensorB });
@@ -123,10 +123,10 @@ TEST(TestOpTensorCopy, CopyHostToHostTensor)
     std::vector<float> testVecA{ 5, 6, 7 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA =
-      mgr.tensor(testVecA, kp::Tensor::TensorTypes::eHost);
-    std::shared_ptr<kp::TensorT<float>> tensorB =
-      mgr.tensor(testVecB, kp::Tensor::TensorTypes::eHost);
+    std::shared_ptr<kp::Memory> tensorA =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> tensorB =
+      mgr.tensor(testVecB, kp::Memory::MemoryTypes::eHost);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(tensorB->isInit());
@@ -149,8 +149,8 @@ TEST(TestOpTensorCopy, SingleTensorShouldFail)
 
     std::vector<float> testVecA{ 6, 7, 8 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorA =
-      mgr.tensor(testVecA, kp::Tensor::TensorTypes::eHost);
+    std::shared_ptr<kp::Memory> tensorA =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
 
     EXPECT_TRUE(tensorA->isInit());
 
@@ -165,11 +165,11 @@ TEST(TestOpTensorCopy, CopyThroughStorageTensor)
     std::vector<float> testVecIn{ 9, 1, 3 };
     std::vector<float> testVecOut{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorIn = mgr.tensor(testVecIn);
-    std::shared_ptr<kp::TensorT<float>> tensorOut = mgr.tensor(testVecOut);
+    std::shared_ptr<kp::Memory> tensorIn = mgr.tensor(testVecIn);
+    std::shared_ptr<kp::Memory> tensorOut = mgr.tensor(testVecOut);
     // Tensor storage requires a vector to be passed only to reflect size
-    std::shared_ptr<kp::TensorT<float>> tensorStorage =
-      mgr.tensor({ 0, 0, 0 }, kp::Tensor::TensorTypes::eStorage);
+    std::shared_ptr<kp::Memory> tensorStorage =
+      mgr.tensor({ 0, 0, 0 }, kp::Memory::MemoryTypes::eStorage);
 
     mgr.sequence()
       ->eval<kp::OpTensorSyncDevice>({ tensorIn, tensorOut })
@@ -188,11 +188,11 @@ TEST(TestOpTensorCopy, CopyTensorThroughStorageViaAlgorithms)
     std::vector<float> testVecIn{ 9, 1, 3 };
     std::vector<float> testVecOut{ 0, 0, 0 };
 
-    std::shared_ptr<kp::TensorT<float>> tensorIn = mgr.tensor(testVecIn);
-    std::shared_ptr<kp::TensorT<float>> tensorOut = mgr.tensor(testVecOut);
+    std::shared_ptr<kp::Memory> tensorIn = mgr.tensor(testVecIn);
+    std::shared_ptr<kp::Memory> tensorOut = mgr.tensor(testVecOut);
     // Tensor storage requires a vector to be passed only to reflect size
-    std::shared_ptr<kp::TensorT<float>> tensorStorage =
-      mgr.tensor({ 0, 0, 0 }, kp::Tensor::TensorTypes::eStorage);
+    std::shared_ptr<kp::Memory> tensorStorage =
+      mgr.tensor({ 0, 0, 0 }, kp::Memory::MemoryTypes::eStorage);
 
     EXPECT_TRUE(tensorIn->isInit());
     EXPECT_TRUE(tensorOut->isInit());

@@ -13,7 +13,7 @@ TEST(TestManager, EndToEndOpMultEvalFlow)
     std::shared_ptr<kp::TensorT<float>> tensorRHS = mgr.tensor({ 2, 4, 6 });
     std::shared_ptr<kp::TensorT<float>> tensorOutput = mgr.tensor({ 0, 0, 0 });
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorLHS,
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorLHS,
                                                         tensorRHS,
                                                         tensorOutput };
 
@@ -33,7 +33,7 @@ TEST(TestManager, EndToEndOpMultSeqFlow)
     std::shared_ptr<kp::TensorT<float>> tensorRHS = mgr.tensor({ 2, 4, 6 });
     std::shared_ptr<kp::TensorT<float>> tensorOutput = mgr.tensor({ 0, 0, 0 });
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorLHS,
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorLHS,
                                                         tensorRHS,
                                                         tensorOutput };
 
@@ -54,7 +54,7 @@ TEST(TestManager, TestMultipleSequences)
     std::shared_ptr<kp::TensorT<float>> tensorRHS = mgr.tensor({ 2, 4, 6 });
     std::shared_ptr<kp::TensorT<float>> tensorOutput = mgr.tensor({ 0, 0, 0 });
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorLHS,
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorLHS,
                                                         tensorRHS,
                                                         tensorOutput };
 
@@ -91,7 +91,7 @@ TEST(TestManager, TestClearDestroy)
         std::shared_ptr<kp::TensorT<float>> tensorOutput =
           mgr.tensor({ 0, 0, 0 });
 
-        std::vector<std::shared_ptr<kp::Tensor>> params = { tensorLHS,
+        std::vector<std::shared_ptr<kp::Memory>> params = { tensorLHS,
                                                             tensorRHS,
                                                             tensorOutput };
 

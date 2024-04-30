@@ -20,7 +20,7 @@ TEST(TestWorkgroup, TestSimpleWorkgroup)
             tensorA = mgr.tensor(std::vector<float>(16 * 8));
             tensorB = mgr.tensor(std::vector<float>(16 * 8));
 
-            std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA,
+            std::vector<std::shared_ptr<kp::Memory>> params = { tensorA,
                                                                 tensorB };
             std::vector<uint32_t> spirv(
               kp::TEST_WORKGROUP_SHADER_COMP_SPV.begin(),

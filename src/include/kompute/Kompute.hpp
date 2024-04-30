@@ -5,6 +5,7 @@
 #include "Manager.hpp"
 #include "Sequence.hpp"
 #include "Tensor.hpp"
+#include "Image.hpp"
 
 #include "operations/OpAlgoDispatch.hpp"
 #include "operations/OpBase.hpp"
@@ -13,6 +14,9 @@
 #include "operations/OpTensorCopy.hpp"
 #include "operations/OpTensorSyncDevice.hpp"
 #include "operations/OpTensorSyncLocal.hpp"
+#include "operations/OpImageCopy.hpp"
+#include "operations/OpImageSyncDevice.hpp"
+#include "operations/OpImageSyncLocal.hpp"
 
 // Will be build by CMake and placed inside the build directory
 #include "ShaderLogisticRegression.hpp"

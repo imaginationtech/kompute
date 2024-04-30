@@ -5,11 +5,14 @@
 
 namespace kp {
 
-OpTensorCopy::OpTensorCopy(const std::vector<std::shared_ptr<Tensor>>& tensors)
+OpTensorCopy::OpTensorCopy(const std::vector<std::shared_ptr<Memory>>& tensors)
 {
     KP_LOG_DEBUG("Kompute OpTensorCopy constructor with params");
 
-    this->mTensors = tensors;
+    for(std::shared_ptr<Memory> tensor : tensors)
+    {
+        this->mTensors.push_back(std::dynamic_pointer_cast<Tensor>(tensor));
+    }
 
     if (this->mTensors.size() < 2) {
         throw std::runtime_error(
@@ -18,7 +21,7 @@ OpTensorCopy::OpTensorCopy(const std::vector<std::shared_ptr<Tensor>>& tensors)
 
     kp::Tensor::TensorDataTypes dataType = this->mTensors[0]->dataType();
     uint32_t size = this->mTensors[0]->size();
-    for (const std::shared_ptr<Tensor>& tensor : tensors) {
+    for (const std::shared_ptr<Tensor>& tensor : this->mTensors) {
         if (tensor->dataType() != dataType) {
             throw std::runtime_error(fmt::format(
               "Attempting to copy tensors of different types from {} to {}",
@@ -62,7 +65,7 @@ OpTensorCopy::postEval(const vk::CommandBuffer& /*commandBuffer*/)
     KP_LOG_DEBUG("Kompute OpTensorCopy postEval called");
 
     // Do not copy on CPU side if source is storage tensor
-    if (this->mTensors[0]->tensorType() == kp::Tensor::TensorTypes::eStorage) {
+    if (this->mTensors[0]->memoryType() == kp::Memory::MemoryTypes::eStorage) {
         KP_LOG_DEBUG("Kompute OpTensorCopy not copying tensor source given "
                      "it's of eStorage type");
         return;
@@ -71,8 +74,8 @@ OpTensorCopy::postEval(const vk::CommandBuffer& /*commandBuffer*/)
 
     // Copy the data from the first tensor into all the tensors
     for (size_t i = 1; i < this->mTensors.size(); i++) {
-        if (this->mTensors[i]->tensorType() ==
-            kp::Tensor::TensorTypes::eStorage) {
+        if (this->mTensors[i]->memoryType() ==
+            kp::Memory::MemoryTypes::eStorage) {
             KP_LOG_DEBUG("Kompute OpTensorCopy not copying to tensor dest "
                          "given it's of eStorage type");
             continue;

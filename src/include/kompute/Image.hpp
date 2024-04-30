@@ -3,6 +3,7 @@
 
 #include "kompute/Core.hpp"
 #include "logger/Logger.hpp"
+#include "Memory.hpp"
 #include <memory>
 #include <string>
 
@@ -15,22 +16,9 @@ namespace kp {
  * would be used to store their respective data. The images can be used for GPU
  * data storage or transfer.
  */
-class Image
+class Image : public Memory
 {
   public:
-    /**
-     * Type for images created: Device allows memory to be transferred from
-     * staging images. Staging are host memory visible. Storage are device
-     * visible but are not set up to transfer or receive data (only for shader
-     * storage).
-     */
-    enum class ImageTypes
-    {
-        eDevice = 0,  ///< Type is device memory, source and destination
-        eHost = 1,    ///< Type is host memory, source and destination
-        eStorage = 2, ///< Type is Device memory (only)
-    };
-
     // FIXME: For now let's just assume 4 channels
     // We'll see later what you actually pass to Vulkan to set this up.
     enum class ImageDataTypes
@@ -46,7 +34,6 @@ class Image
     };
 
     static std::string toString(ImageDataTypes dt);
-    static std::string toString(ImageTypes dt);
 
     /**
      *  Constructor with data provided which would be used to create the
@@ -59,7 +46,7 @@ class Image
      *  @param width Width of the image in pixels
      *  @param height Height of the image in pixels
      *  @param dataType Data type for the image which is of type ImageDataTypes
-     *  @param imageType Type for the image which is of type ImageTypes
+     *  @param imageType Type for the image which is of type MemoryTypes
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           std::shared_ptr<vk::Device> device,
@@ -68,7 +55,7 @@ class Image
           uint32_t height,
           uint32_t numChannels,
           const ImageDataTypes& dataType,
-          const ImageTypes& imageType = ImageTypes::eDevice);
+          const MemoryTypes& imageType = MemoryTypes::eDevice);
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -95,13 +82,6 @@ class Image
      * @returns Boolean stating whether image is initialized
      */
     bool isInit();
-
-    /**
-     * Retrieve the image type of the image
-     *
-     * @return image type of image
-     */
-    ImageTypes ImageType();
 
     /**
      * Records a copy from the memory of the image provided to the current
@@ -143,7 +123,7 @@ class Image
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordPrimaryImageMemoryBarrier(
+    void recordPrimaryMemoryBarrier(
       const vk::CommandBuffer& commandBuffer,
       vk::AccessFlagBits srcAccessMask,
       vk::AccessFlagBits dstAccessMask,
@@ -160,7 +140,7 @@ class Image
      * @param scrStageMask Pipeline stage flags for source stage mask
      * @param dstStageMask Pipeline stage flags for destination stage mask
      */
-    void recordStagingImageMemoryBarrier(
+    void recordStagingMemoryBarrier(
       const vk::CommandBuffer& commandBuffer,
       vk::AccessFlagBits srcAccessMask,
       vk::AccessFlagBits dstAccessMask,
@@ -168,39 +148,13 @@ class Image
       vk::PipelineStageFlagBits dstStageMask);
 
     /**
-     * Constructs a vulkan descriptor image info which can be used to specify
-     * and reference the underlying image component of the image without
-     * exposing it.
+     * Adds this object to a Vulkan descriptor set at \p binding.
      *
-     * @return Descriptor image info with own image
+     * @param descriptorSet The descriptor set to add to.
+     * @param binding The binding number to use.
+     * @return Add this object to a descriptor set at \p binding.
      */
-    vk::DescriptorImageInfo constructDescriptorImageInfo();
-
-    /**
-     * Returns the size/magnitude of the image, which will be the total number
-     * of elements across all dimensions
-     *
-     * @return Unsigned integer representing the total number of elements
-     */
-    uint32_t size();
-
-    /**
-     * Returns the total size of a single element of the respective data type
-     * that this image holds.
-     *
-     * @return Unsigned integer representing the memory of a single element of
-     * the respective data type.
-     */
-    uint32_t dataTypeMemorySize();
-
-    /**
-     * Returns the total memory size of the data contained by the image object
-     * which would equate to (this->size() * this->dataTypeMemorySize())
-     *
-     * @return Unsigned integer representing the total memory size of the data
-     * contained by the image object.
-     */
-    uint32_t memorySize();
+    vk::WriteDescriptorSet constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding);
 
     /**
      * Retrieve the data type of the image (host, device, storage)
@@ -208,21 +162,6 @@ class Image
      * @return Data type of image of type kp::image::ImageDataTypes
      */
     ImageDataTypes dataType();
-
-    /**
-     * Retrieve the raw data via the pointer to the memory that contains the raw
-     * memory of this current image. This image gets changed to a nullptr when
-     * the image is removed.
-     *
-     * @return Pointer to raw memory containing raw bytes data of image.
-     */
-    void* rawData();
-
-    /**
-     * Sets / resets the data of the image which is directly done on the GPU
-     * host visible memory available by the image.
-     */
-    void setRawData(const void* data);
 
     /**
      * Template to return the pointer data converted by specific type, which
@@ -250,10 +189,7 @@ class Image
 
   protected:
     // -------------- ALWAYS OWNED RESOURCES
-    ImageTypes mImageType;
     ImageDataTypes mDataType;
-    uint32_t mSize;
-    uint32_t mDataTypeMemorySize;
     uint32_t mWidth;
     uint32_t mHeight;
     uint32_t mNumChannels;
@@ -302,6 +238,8 @@ class Image
 
     constexpr size_t elementTypeSize(ImageDataTypes type);
     vk::Format getFormat();
+
+    vk::DescriptorImageInfo constructDescriptorImageInfo();
 };
 
 template<typename T>
@@ -315,7 +253,7 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-           const ImageTypes& imageType = ImageTypes::eDevice)
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
       : Image(physicalDevice,
               device,
               (void*)data.data(),

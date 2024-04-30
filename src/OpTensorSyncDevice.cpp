@@ -5,7 +5,7 @@
 namespace kp {
 
 OpTensorSyncDevice::OpTensorSyncDevice(
-  const std::vector<std::shared_ptr<Tensor>>& tensors)
+  const std::vector<std::shared_ptr<Memory>>& tensors)
 {
     KP_LOG_DEBUG("Kompute OpTensorSyncDevice constructor with params");
 
@@ -30,7 +30,7 @@ OpTensorSyncDevice::record(const vk::CommandBuffer& commandBuffer)
     KP_LOG_DEBUG("Kompute OpTensorSyncDevice record called");
 
     for (size_t i = 0; i < this->mTensors.size(); i++) {
-        if (this->mTensors[i]->tensorType() == Tensor::TensorTypes::eDevice) {
+        if (this->mTensors[i]->memoryType() == Tensor::MemoryTypes::eDevice) {
             this->mTensors[i]->recordCopyFromStagingToDevice(commandBuffer);
         }
     }

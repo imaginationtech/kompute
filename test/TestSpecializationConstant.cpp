@@ -35,7 +35,7 @@ TEST(TestSpecializationConstants, TestTwoConstants)
             std::shared_ptr<kp::TensorT<float>> tensorB =
               mgr.tensor({ 0, 0, 0 });
 
-            std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA,
+            std::vector<std::shared_ptr<kp::Memory>> params = { tensorA,
                                                                 tensorB };
 
             std::vector<float> spec = std::vector<float>({ 5.0, 0.3 });
@@ -83,7 +83,7 @@ TEST(TestSpecializationConstants, TestConstantsInt)
             std::shared_ptr<kp::TensorT<int32_t>> tensorB =
               mgr.tensorT<int32_t>({ 0, 0, 0 });
 
-            std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA,
+            std::vector<std::shared_ptr<kp::Memory>> params = { tensorA,
                                                                 tensorB };
 
             std::vector<int32_t> spec({ -1, -2 });

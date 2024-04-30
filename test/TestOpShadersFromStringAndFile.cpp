@@ -64,7 +64,7 @@ TEST(TestShader, ShaderRawDataFromConstructorCustomDataType)
 
     std::vector<uint32_t> spirv = compileSource(shader);
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA, tensorB };
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorA, tensorB };
 
     mgr.sequence()
       ->eval<kp::OpTensorSyncDevice>(params)
@@ -127,7 +127,7 @@ TEST(TestOpAlgoCreate, ShaderRawDataFromConstructor)
 
     std::vector<uint32_t> spirv = compileSource(shader);
 
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA, tensorB };
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorA, tensorB };
 
     mgr.sequence()
       ->eval<kp::OpTensorSyncDevice>(params)
@@ -147,7 +147,7 @@ TEST(TestOpAlgoCreate, ShaderCompiledDataFromConstructor)
 
     std::vector<uint32_t> spirv(kp::TEST_OP_CUSTOM_SHADER_COMP_SPV.begin(),
                                 kp::TEST_OP_CUSTOM_SHADER_COMP_SPV.end());
-    std::vector<std::shared_ptr<kp::Tensor>> params = { tensorA, tensorB };
+    std::vector<std::shared_ptr<kp::Memory>> params = { tensorA, tensorB };
 
     mgr.sequence()
       ->eval<kp::OpTensorSyncDevice>(params)
