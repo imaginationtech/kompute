@@ -120,7 +120,7 @@ TEST(TestMultipleAlgoExecutions, MultipleCmdBufRecords)
 {
     kp::Manager mgr;
 
-    std::shared_ptr < kp::Memory >> tensorA = mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
@@ -191,7 +191,7 @@ TEST(TestMultipleAlgoExecutions, SingleRecordMultipleEval)
 {
     kp::Manager mgr;
 
-    std::shared_ptr<kp::Memory> tensorA = { mgr.tensor({ 0, 0, 0 });
+    std::shared_ptr<kp::Memory> tensorA = mgr.tensor({ 0, 0, 0 });
 
     std::string shader(R"(
       #version 450
