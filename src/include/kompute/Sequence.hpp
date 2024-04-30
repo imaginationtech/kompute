@@ -53,7 +53,7 @@ class Sequence : public std::enable_shared_from_this<Sequence>
      * function also requires the Sequence to be recording, otherwise it will
      * not be able to add the operation.
      *
-     * @param tensors Vector of mem objects to use for the operation
+     * @param memObjects Vector of mem objects to use for the operation
      * @param TArgs Template parameters that are used to initialise operation
      * which allows for extensible configurations on initialisation.
      * @return shared_ptr<Sequence> of the Sequence class itself
