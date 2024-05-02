@@ -193,7 +193,10 @@ class Image : public Memory
     uint32_t mWidth;
     uint32_t mHeight;
     uint32_t mNumChannels;
-    void* mRawData;
+    vk::DescriptorImageInfo mDescriptorImageInfo;
+    vk::ImageLayout mPrimaryImageLayout = vk::ImageLayout::eUndefined;
+    vk::ImageLayout mStagingImageLayout = vk::ImageLayout::eUndefined;
+    std::shared_ptr<vk::ImageView> mImageView = nullptr;
 
   private:
     // -------------- NEVER OWNED RESOURCES
@@ -225,7 +228,9 @@ class Image : public Memory
                                   vk::AccessFlagBits srcAccessMask,
                                   vk::AccessFlagBits dstAccessMask,
                                   vk::PipelineStageFlagBits srcStageMask,
-                                  vk::PipelineStageFlagBits dstStageMask);
+                                  vk::PipelineStageFlagBits dstStageMask,
+                                  vk::ImageLayout oldLayout,
+                                  vk::ImageLayout newLayout);
 
     // Private util functions
     vk::ImageUsageFlags getPrimaryImageUsageFlags();

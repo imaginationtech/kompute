@@ -39,6 +39,7 @@ Tensor::Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mDevice = device;
     this->mDataType = dataType;
     this->mMemoryType = memoryType;
+    this->mDescriptorType = vk::DescriptorType::eStorageBuffer;
 
     this->rebuild(data, elementTotalCount, elementMemorySize);
 }
@@ -281,16 +282,19 @@ Tensor::constructDescriptorSet(vk::DescriptorSet descriptorSet,
     KP_LOG_DEBUG("Kompute Tensor construct descriptor set for binding {}",
                  binding);
 
-    vk::DescriptorBufferInfo descriptorBufferInfo =
+    mDescriptorBufferInfo =
       this->constructDescriptorBufferInfo();
 
-    return vk::WriteDescriptorSet(descriptorSet,
+    vk::WriteDescriptorSet writeDesciptorSet =  vk::WriteDescriptorSet(descriptorSet,
                                   binding, // Destination binding
                                   0,       // Destination array element
                                   1,       // Descriptor count
                                   vk::DescriptorType::eStorageBuffer,
                                   nullptr, // Descriptor image info
-                                  &descriptorBufferInfo);
+                                  // Using a member variable here means the address is still valid later
+                                  &mDescriptorBufferInfo);
+
+    return writeDesciptorSet;
 }
 
 vk::BufferUsageFlags

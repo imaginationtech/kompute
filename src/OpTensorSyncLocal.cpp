@@ -35,6 +35,7 @@ OpTensorSyncLocal::record(const vk::CommandBuffer& commandBuffer)
             this->mTensors[i]->recordPrimaryMemoryBarrier(
               commandBuffer,
               vk::AccessFlagBits::eShaderWrite,
+              // FIXME: eTransferRead is not supported for the compute pipeline
               vk::AccessFlagBits::eTransferRead,
               vk::PipelineStageFlagBits::eComputeShader,
               vk::PipelineStageFlagBits::eTransfer);
@@ -43,6 +44,7 @@ OpTensorSyncLocal::record(const vk::CommandBuffer& commandBuffer)
 
             this->mTensors[i]->recordPrimaryMemoryBarrier(
               commandBuffer,
+              // FIXME: eTransferRead is not supported for the compute pipeline
               vk::AccessFlagBits::eTransferWrite,
               vk::AccessFlagBits::eHostRead,
               vk::PipelineStageFlagBits::eTransfer,
