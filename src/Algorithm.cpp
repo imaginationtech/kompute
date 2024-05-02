@@ -129,9 +129,14 @@ Algorithm::createParameters()
 {
     KP_LOG_DEBUG("Kompute Algorithm createParameters started");
 
+    // FIXME: Get the correct count here.
     std::vector<vk::DescriptorPoolSize> descriptorPoolSizes = {
         vk::DescriptorPoolSize(
           vk::DescriptorType::eStorageBuffer,
+          static_cast<uint32_t>(this->mMemObjects.size()) // Descriptor count
+          ),
+        vk::DescriptorPoolSize(
+          vk::DescriptorType::eStorageImage,
           static_cast<uint32_t>(this->mMemObjects.size()) // Descriptor count
           )
     };
@@ -152,7 +157,7 @@ Algorithm::createParameters()
     for (size_t i = 0; i < this->mMemObjects.size(); i++) {
         descriptorSetBindings.push_back(
           vk::DescriptorSetLayoutBinding(i, // Binding index
-                                         vk::DescriptorType::eStorageBuffer,
+                                         mMemObjects[i]->getDescriptorType(),
                                          1, // Descriptor count
                                          vk::ShaderStageFlagBits::eCompute));
     }

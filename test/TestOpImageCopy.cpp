@@ -198,12 +198,12 @@ TEST(TestOpImageCopy, CopyImageThroughStorageViaAlgorithms)
         layout (local_size_x = 1) in;
 
         // The input tensors bind index is relative to index in parameter passed
-        layout(set = 0, binding = 0) buffer buf_in { float t_in[]; };
-        layout(set = 0, binding = 1) buffer buf_st { float t_st[]; };
+        layout(set = 0, binding = 0, r32f) uniform image2D image_in;
+        layout(set = 0, binding = 1, r32f) uniform image2D image_out;
 
         void main() {
             uint index = gl_GlobalInvocationID.x;
-            t_st[index] = t_in[index];
+            imageStore(image_out, ivec2(index, 0), imageLoad(image_in, ivec2(index, 0))) ;
         }
     )");
 
@@ -217,12 +217,12 @@ TEST(TestOpImageCopy, CopyImageThroughStorageViaAlgorithms)
         layout (local_size_x = 1) in;
 
         // The input tensors bind index is relative to index in parameter passed
-        layout(set = 0, binding = 0) buffer buf_st { float t_st[]; };
-        layout(set = 0, binding = 1) buffer buf_out { float t_out[]; };
+        layout(set = 0, binding = 0, r32f) uniform image2D image_in;
+        layout(set = 0, binding = 1, r32f) uniform image2D image_out;
 
         void main() {
             uint index = gl_GlobalInvocationID.x;
-            t_out[index] = t_st[index];
+            imageStore(image_out, ivec2(index, 0), imageLoad(image_in, ivec2(index, 0))) ;
         }
     )");
 

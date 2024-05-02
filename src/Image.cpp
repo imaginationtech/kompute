@@ -56,6 +56,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mWidth = width;
     this->mHeight = height;
     this->mNumChannels = numChannels;
+    this->mDescriptorType = vk::DescriptorType::eStorageImage;
 
     this->rebuild(data);
 }
@@ -112,7 +113,6 @@ Image::dataType()
 void
 Image::mapRawData()
 {
-
     KP_LOG_DEBUG("Kompute Image mapping data from host image");
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
@@ -138,7 +138,6 @@ Image::mapRawData()
 void
 Image::unmapRawData()
 {
-
     KP_LOG_DEBUG("Kompute Image mapping data from host image");
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
@@ -164,6 +163,8 @@ Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
                       std::shared_ptr<Image> copyFromImage)
 {
     vk::ImageSubresourceLayers layer = {};
+    layer.aspectMask = vk::ImageAspectFlagBits::eColor;
+    layer.layerCount = 1;
     vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
@@ -173,6 +174,26 @@ Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
 
     KP_LOG_DEBUG(
       "Kompute Image recordCopyFrom size {},{}.", size.width, size.height);
+
+    if (copyFromImage->mPrimaryImageLayout == vk::ImageLayout::eUndefined)
+    {
+        copyFromImage->recordPrimaryMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
+
+    if (this->mPrimaryImageLayout == vk::ImageLayout::eUndefined)
+    {
+        this->recordPrimaryMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
 
     this->recordCopyImage(commandBuffer,
                           copyFromImage->mPrimaryImage,
@@ -184,6 +205,8 @@ void
 Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 {
     vk::ImageSubresourceLayers layer = {};
+    layer.aspectMask = vk::ImageAspectFlagBits::eColor;
+    layer.layerCount = 1;
     vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
@@ -192,6 +215,26 @@ Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
     KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
+
+    if (this->mPrimaryImageLayout == vk::ImageLayout::eUndefined)
+    {
+        this->recordPrimaryMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
+
+    if (this->mStagingImageLayout == vk::ImageLayout::eUndefined)
+    {
+        this->recordStagingMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
 
     this->recordCopyImage(
       commandBuffer, this->mStagingImage, this->mPrimaryImage, copyRegion);
@@ -200,7 +243,9 @@ Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 void
 Image::recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer)
 {
-    vk::ImageSubresourceLayers layer = {};
+    vk::ImageSubresourceLayers layer;
+    layer.aspectMask = vk::ImageAspectFlagBits::eColor;
+    layer.layerCount = 1;
     vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
@@ -209,6 +254,26 @@ Image::recordCopyFromDeviceToStaging(const vk::CommandBuffer& commandBuffer)
     vk::ImageCopy copyRegion(layer, offset, layer, offset, size);
 
     KP_LOG_DEBUG("Kompute Image copying size {},{}.", size.width, size.height);
+
+    if (this->mPrimaryImageLayout == vk::ImageLayout::eUndefined)
+    {
+        this->recordPrimaryMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
+
+    if (this->mStagingImageLayout == vk::ImageLayout::eUndefined)
+    {
+        this->recordStagingMemoryBarrier(commandBuffer,
+                                                vk::AccessFlagBits::eMemoryRead,
+                                                vk::AccessFlagBits::eMemoryWrite,
+                                                vk::PipelineStageFlagBits::eTransfer,
+                                                vk::PipelineStageFlagBits::eTransfer
+                                                );
+    }
 
     this->recordCopyImage(
       commandBuffer, this->mPrimaryImage, this->mStagingImage, copyRegion);
@@ -237,12 +302,16 @@ Image::recordPrimaryMemoryBarrier(const vk::CommandBuffer& commandBuffer,
 {
     KP_LOG_DEBUG("Kompute Image recording PRIMARY image memory barrier");
 
+    // FIXME: Image layout is used here to transition from eUndefined on creation to
+    // eGeneral for the rest of the program. Is there a better way/place to do this?
     this->recordImageMemoryBarrier(commandBuffer,
                                    *this->mPrimaryImage,
                                    srcAccessMask,
                                    dstAccessMask,
                                    srcStageMask,
-                                   dstStageMask);
+                                   dstStageMask,
+                                   this->mPrimaryImageLayout,
+                                   vk::ImageLayout::eGeneral);
 }
 
 void
@@ -254,12 +323,16 @@ Image::recordStagingMemoryBarrier(const vk::CommandBuffer& commandBuffer,
 {
     KP_LOG_DEBUG("Kompute Image recording STAGING image memory barrier");
 
+    // FIXME: Image layout is used here to transition from eUndefined on creation to
+    // eGeneral for the rest of the program. Is there a better way/place to do this?
     this->recordImageMemoryBarrier(commandBuffer,
                                    *this->mStagingImage,
                                    srcAccessMask,
                                    dstAccessMask,
                                    srcStageMask,
-                                   dstStageMask);
+                                   dstStageMask,
+                                   this->mStagingImageLayout,
+                                   vk::ImageLayout::eGeneral);
 }
 
 // FIXME: Make this private.
@@ -269,7 +342,9 @@ Image::recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                 vk::AccessFlagBits srcAccessMask,
                                 vk::AccessFlagBits dstAccessMask,
                                 vk::PipelineStageFlagBits srcStageMask,
-                                vk::PipelineStageFlagBits dstStageMask)
+                                vk::PipelineStageFlagBits dstStageMask,
+                                vk::ImageLayout outLayout,
+                                vk::ImageLayout newLayout)
 {
     KP_LOG_DEBUG("Kompute Image recording image memory barrier");
 
@@ -280,11 +355,15 @@ Image::recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
     imageMemoryBarrier.subresourceRange.levelCount = 1;
     imageMemoryBarrier.subresourceRange.baseArrayLayer = 0;
     imageMemoryBarrier.subresourceRange.layerCount = 1;
+    imageMemoryBarrier.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
 
     imageMemoryBarrier.srcAccessMask = srcAccessMask;
     imageMemoryBarrier.dstAccessMask = dstAccessMask;
     imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+    imageMemoryBarrier.oldLayout = outLayout;
+    imageMemoryBarrier.newLayout = newLayout;
 
     commandBuffer.pipelineBarrier(srcStageMask,
                                   dstStageMask,
@@ -302,9 +381,26 @@ Image::constructDescriptorImageInfo()
 
     // RQ: FIXME: Initilaise these correctly.
     vk::ImageViewCreateInfo viewInfo;
+    viewInfo.image = *this->mPrimaryImage;
+    viewInfo.format = this->getFormat();
+    viewInfo.flags = vk::ImageViewCreateFlags();
+    viewInfo.viewType = vk::ImageViewType::e2D;
+
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+    viewInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+
+    // This image object owns the image view
+    if (!this->mImageView)
+    {
+        mImageView = std::make_shared<vk::ImageView>(this->mDevice->createImageView(viewInfo));
+    }
+
     vk::DescriptorImageInfo descriptorInfo;
 
-    descriptorInfo.imageView = this->mDevice->createImageView(viewInfo);
+    descriptorInfo.imageView = *(mImageView.get());
     descriptorInfo.imageLayout = vk::ImageLayout::eGeneral;
     return descriptorInfo;
 }
@@ -315,15 +411,15 @@ Image::constructDescriptorSet(vk::DescriptorSet descriptorSet, uint32_t binding)
     KP_LOG_DEBUG("Kompute Image construct descriptor set for binding {}",
                  binding);
 
-    vk::DescriptorImageInfo descriptorImageInfo =
+    mDescriptorImageInfo =
       this->constructDescriptorImageInfo();
 
     return vk::WriteDescriptorSet(descriptorSet,
                                   binding, // Destination binding
                                   0,       // Destination array element
                                   1,       // Descriptor count
-                                  vk::DescriptorType::eStorageBuffer,
-                                  &descriptorImageInfo,
+                                  vk::DescriptorType::eStorageImage,
+                                  &mDescriptorImageInfo,
                                   nullptr); // Descriptor buffer info
 }
 
@@ -342,7 +438,12 @@ Image::getPrimaryImageUsageFlags()
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
         case MemoryTypes::eStorage:
-            return vk::ImageUsageFlagBits::eStorage;
+            return vk::ImageUsageFlagBits::eStorage |
+                   // You can still copy image-copy to/from storage memory
+                   // (or at least TestOpImageCopy.CopyThroughStorageImage tests you can)
+                   // so set the transfer usage flags here.
+                   vk::ImageUsageFlagBits::eTransferSrc |
+                   vk::ImageUsageFlagBits::eTransferDst;
             break;
         default:
             throw std::runtime_error("Kompute Image invalid Image type");
@@ -438,7 +539,6 @@ void
 Image::createImage(std::shared_ptr<vk::Image> image,
                    vk::ImageUsageFlags imageUsageFlags)
 {
-
     vk::DeviceSize imageSize = this->memorySize();
 
     if (imageSize < 1) {
@@ -461,6 +561,7 @@ Image::createImage(std::shared_ptr<vk::Image> image,
     imageInfo.usage = imageUsageFlags;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
+    imageInfo.initialLayout = vk::ImageLayout::eUndefined;
 
     this->mDevice->createImage(&imageInfo, nullptr, image.get());
 }
@@ -586,6 +687,13 @@ Image::destroy()
             this->mStagingMemory = nullptr;
             this->mFreeStagingMemory = false;
         }
+    }
+
+    if (this->mImageView)
+    {
+        KP_LOG_DEBUG("Kompose Image freeing image view");
+        this->mDevice->destroyImageView(*this->mImageView);
+        this->mImageView = nullptr;
     }
 
     if (this->mDevice) {

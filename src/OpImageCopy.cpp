@@ -9,7 +9,7 @@ OpImageCopy::OpImageCopy(const std::vector<std::shared_ptr<Memory>>& images)
 {
     KP_LOG_DEBUG("Kompute OpImageCopy constructor with params");
 
-    if (this->mImages.size() < 2) {
+    if (images.size() < 2) {
         throw std::runtime_error(
           "Kompute OpImageCopy called with less than 2 images");
     }

@@ -162,6 +162,7 @@ class Tensor : public Memory
   protected:
     // -------------- ALWAYS OWNED RESOURCES
     TensorDataTypes mDataType;
+    vk::DescriptorBufferInfo mDescriptorBufferInfo;
 
   private:
     // -------------- NEVER OWNED RESOURCES

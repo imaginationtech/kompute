@@ -143,6 +143,11 @@ class Memory
      */
     uint32_t memorySize();
 
+    vk::DescriptorType getDescriptorType()
+    {
+      return mDescriptorType;
+    }
+
     /**
      * Retrieve the raw data via the pointer to the memory that contains the raw
      * memory of this current tensor. This tensor gets changed to a nullptr when
@@ -205,7 +210,8 @@ class Memory
     MemoryTypes mMemoryType;
     uint32_t mSize;
     uint32_t mDataTypeMemorySize;
-    void* mRawData;
+    void* mRawData = nullptr;
+    vk::DescriptorType mDescriptorType;
 };
 
 } // End namespace kp
