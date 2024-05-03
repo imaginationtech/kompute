@@ -28,6 +28,10 @@ class Tensor : public Memory
         eFloat = 3,
         eDouble = 4,
         eCustom = 5,
+        eChar = 6,
+        eUnsignedChar = 7,
+        eShort = 8,
+        eUnsignedShort = 9
     };
 
     static std::string toString(TensorDataTypes dt);

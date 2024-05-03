@@ -22,6 +22,7 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestSequence.cpp
     TestSpecializationConstant.cpp
     TestWorkgroup.cpp
+    TestTensor.cpp
     TestImage.cpp
     TestOpImageCreate.cpp
     TestOpImageCopy.cpp)
