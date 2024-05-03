@@ -26,6 +26,32 @@ TEST(TestTensor, DataTypes)
     }
 
     {
+        std::vector<int8_t> vec{ 0, 1, 2 };
+        std::shared_ptr<kp::TensorT<int8_t>> tensor = mgr.tensorT(vec);
+        EXPECT_EQ(tensor->dataType(), kp::Tensor::TensorDataTypes::eChar);
+    }
+
+    {
+        std::vector<uint8_t> vec{ 0, 1, 2 };
+        std::shared_ptr<kp::TensorT<uint8_t>> tensor = mgr.tensorT(vec);
+        EXPECT_EQ(tensor->dataType(),
+                  kp::Tensor::TensorDataTypes::eUnsignedChar);
+    }
+
+    {
+        std::vector<int16_t> vec{ 0, 1, 2 };
+        std::shared_ptr<kp::TensorT<int16_t>> tensor = mgr.tensorT(vec);
+        EXPECT_EQ(tensor->dataType(), kp::Tensor::TensorDataTypes::eShort);
+    }
+
+    {
+        std::vector<uint16_t> vec{ 0, 1, 2 };
+        std::shared_ptr<kp::TensorT<uint16_t>> tensor = mgr.tensorT(vec);
+        EXPECT_EQ(tensor->dataType(),
+                  kp::Tensor::TensorDataTypes::eUnsignedShort);
+    }
+
+    {
         std::vector<int32_t> vec{ 0, 1, 2 };
         std::shared_ptr<kp::TensorT<int32_t>> tensor = mgr.tensorT(vec);
         EXPECT_EQ(tensor->dataType(), kp::Tensor::TensorDataTypes::eInt);

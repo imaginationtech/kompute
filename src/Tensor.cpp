@@ -570,6 +570,34 @@ TensorT<bool>::dataType()
 
 template<>
 Tensor::TensorDataTypes
+TensorT<int8_t>::dataType()
+{
+    return Tensor::TensorDataTypes::eChar;
+}
+
+template<>
+Tensor::TensorDataTypes
+TensorT<uint8_t>::dataType()
+{
+    return Tensor::TensorDataTypes::eUnsignedChar;
+}
+
+template<>
+Tensor::TensorDataTypes
+TensorT<int16_t>::dataType()
+{
+    return Tensor::TensorDataTypes::eShort;
+}
+
+template<>
+Tensor::TensorDataTypes
+TensorT<uint16_t>::dataType()
+{
+    return Tensor::TensorDataTypes::eUnsignedShort;
+}
+
+template<>
+Tensor::TensorDataTypes
 TensorT<int32_t>::dataType()
 {
     return Tensor::TensorDataTypes::eInt;
