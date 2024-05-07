@@ -96,6 +96,31 @@ class Manager
         return tensor;
     }
 
+    /**
+     * Create a managed tensor that will be destroyed by this manager
+     * if it hasn't been destroyed by its reference count going to zero.
+     *
+     * @param size The number of element in this tensor
+     * @param tensorType The type of tensor to initialize
+     * @returns Shared pointer with initialised tensor
+     */
+    template<typename T>
+    std::shared_ptr<TensorT<T>> tensorT(
+      size_t size,
+      Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
+    {
+        KP_LOG_DEBUG("Kompute Manager tensor creation triggered");
+
+        std::shared_ptr<TensorT<T>> tensor{ new kp::TensorT<T>(
+          this->mPhysicalDevice, this->mDevice, size, tensorType) };
+
+        if (this->mManageResources) {
+            this->mManagedTensors.push_back(tensor);
+        }
+
+        return tensor;
+    }
+
     std::shared_ptr<TensorT<float>> tensor(
       const std::vector<float>& data,
       Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
@@ -113,6 +138,26 @@ class Manager
         std::shared_ptr<Tensor> tensor{ new kp::Tensor(this->mPhysicalDevice,
                                                        this->mDevice,
                                                        data,
+                                                       elementTotalCount,
+                                                       elementMemorySize,
+                                                       dataType,
+                                                       tensorType) };
+
+        if (this->mManageResources) {
+            this->mManagedTensors.push_back(tensor);
+        }
+
+        return tensor;
+    }
+
+    std::shared_ptr<Tensor> tensor(
+      uint32_t elementTotalCount,
+      uint32_t elementMemorySize,
+      const Tensor::TensorDataTypes& dataType,
+      Tensor::MemoryTypes tensorType = Tensor::MemoryTypes::eDevice)
+    {
+        std::shared_ptr<Tensor> tensor{ new kp::Tensor(this->mPhysicalDevice,
+                                                       this->mDevice,
                                                        elementTotalCount,
                                                        elementMemorySize,
                                                        dataType,
@@ -159,6 +204,30 @@ class Manager
         return image;
     }
 
+    template<typename T>
+    std::shared_ptr<ImageT<T>> imageT(
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+    {
+        KP_LOG_DEBUG("Kompute Manager image creation triggered");
+
+        std::shared_ptr<ImageT<T>> image{ new kp::ImageT<T>(
+          this->mPhysicalDevice,
+          this->mDevice,
+          width,
+          height,
+          numChannels,
+          imageType) };
+
+        if (this->mManageResources) {
+            this->mManagedImages.push_back(image);
+        }
+
+        return image;
+    }
+
     std::shared_ptr<ImageT<float>> image(
       const std::vector<float>& data,
       uint32_t width,
@@ -167,6 +236,15 @@ class Manager
       Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
         return this->imageT<float>(data, width, height, numChannels, imageType);
+    }
+
+    std::shared_ptr<ImageT<float>> image(
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+    {
+        return this->imageT<float>(width, height, numChannels, imageType);
     }
 
     std::shared_ptr<Image> image(
@@ -180,6 +258,28 @@ class Manager
         std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
                                                     this->mDevice,
                                                     data,
+                                                    width,
+                                                    height,
+                                                    numChannels,
+                                                    dataType,
+                                                    imageType) };
+
+        if (this->mManageResources) {
+            this->mManagedImages.push_back(image);
+        }
+
+        return image;
+    }
+
+      std::shared_ptr<Image> image(
+      uint32_t width,
+      uint32_t height,
+      uint32_t numChannels,
+      const Image::ImageDataTypes& dataType,
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+    {
+        std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
+                                                    this->mDevice,
                                                     width,
                                                     height,
                                                     numChannels,

@@ -19,8 +19,6 @@ namespace kp {
 class Image : public Memory
 {
   public:
-    // FIXME: For now let's just assume 4 channels
-    // We'll see later what you actually pass to Vulkan to set this up.
     enum class ImageDataTypes
     {
         eS8 = 0,
@@ -56,6 +54,24 @@ class Image : public Memory
           uint32_t numChannels,
           const ImageDataTypes& dataType,
           const MemoryTypes& imageType = MemoryTypes::eDevice);
+
+    /**
+     *  Constructor with no data provided.
+     *
+     *  @param physicalDevice The physical device to use to fetch properties
+     *  @param device The device to use to create the image and memory from
+     *  @param width Width of the image in pixels
+     *  @param height Height of the image in pixels
+     *  @param dataType Data type for the image which is of type ImageDataTypes
+     *  @param imageType Type for the image which is of type MemoryTypes
+     */
+    Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+             std::shared_ptr<vk::Device> device,
+             uint32_t width,
+             uint32_t height,
+             uint32_t numChannels,
+             const ImageDataTypes& dataType,
+             const MemoryTypes& memoryType) : Image(physicalDevice, device, nullptr, width, height, numChannels, dataType, memoryType) {};
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -274,10 +290,36 @@ class ImageT : public Image
                      width,
                      height,
                      numChannels);
+        if (data.size() == 0) {
+            throw std::runtime_error(
+              "Kompute Tensor attempted to create a zero-sized image");
+        }
+              
         if (data.size() < width * height * numChannels) {
             throw std::runtime_error(
               "Kompute ImageT vector is smaller than the requested image size");
         }
+    }
+
+    ImageT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+           std::shared_ptr<vk::Device> device,
+           uint32_t width,
+           uint32_t height,
+           uint32_t numChannels,
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
+      : Image(physicalDevice,
+              device,
+              width,
+              height,
+              numChannels,
+              this->dataType(),
+              imageType)
+    {
+        KP_LOG_DEBUG("Kompute imageT constructor with no data, width {}, "
+                     "height {}, and num channels {}",
+                     width,
+                     height,
+                     numChannels);
     }
 
     ~ImageT() { KP_LOG_DEBUG("Kompute imageT destructor"); }

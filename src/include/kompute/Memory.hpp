@@ -212,6 +212,7 @@ class Memory
     uint32_t mDataTypeMemorySize;
     void* mRawData = nullptr;
     vk::DescriptorType mDescriptorType;
+    bool mUnmapMemory = false;
 };
 
 } // End namespace kp

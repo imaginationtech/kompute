@@ -44,7 +44,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
       height,
       Memory::toString(memoryType));
 
-    if (!data || width == 0 || height == 0 || numChannels == 0) {
+    if (width == 0 || height == 0 || numChannels == 0) {
         throw std::runtime_error(
           "Kompute Image attempted to create a zero-sized image");
     }
@@ -91,7 +91,7 @@ Image::rebuild(void* data)
     this->mDataTypeMemorySize = elementTypeSize(this->mDataType);
     this->allocateMemoryCreateGPUResources();
 
-    if (this->memoryType() != Image::MemoryTypes::eStorage) {
+    if (this->memoryType() != Image::MemoryTypes::eStorage && data != nullptr) {
         this->mapRawData();
         memcpy(this->mRawData, data, this->memorySize());
     }
@@ -133,12 +133,18 @@ Image::mapRawData()
     // flush
     this->mRawData = this->mDevice->mapMemory(
       *hostVisibleMemory, 0, imageSize, vk::MemoryMapFlags());
+
+    this->mUnmapMemory = true;
 }
 
 void
 Image::unmapRawData()
 {
-    KP_LOG_DEBUG("Kompute Image mapping data from host image");
+    KP_LOG_DEBUG("Kompute Image unmapping data from host image");
+
+    if(!this->mUnmapMemory) {
+        return;
+    }
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
 
@@ -156,6 +162,8 @@ Image::unmapRawData()
     vk::MappedMemoryRange mappedRange(*hostVisibleMemory, 0, imageSize);
     this->mDevice->flushMappedMemoryRanges(1, &mappedRange);
     this->mDevice->unmapMemory(*hostVisibleMemory);
+
+    this->mUnmapMemory = false;
 }
 
 void
