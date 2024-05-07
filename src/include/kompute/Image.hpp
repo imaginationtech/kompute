@@ -66,12 +66,20 @@ class Image : public Memory
      *  @param imageType Type for the image which is of type MemoryTypes
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-             std::shared_ptr<vk::Device> device,
-             uint32_t width,
-             uint32_t height,
-             uint32_t numChannels,
-             const ImageDataTypes& dataType,
-             const MemoryTypes& memoryType) : Image(physicalDevice, device, nullptr, width, height, numChannels, dataType, memoryType) {};
+          std::shared_ptr<vk::Device> device,
+          uint32_t width,
+          uint32_t height,
+          uint32_t numChannels,
+          const ImageDataTypes& dataType,
+          const MemoryTypes& memoryType)
+      : Image(physicalDevice,
+              device,
+              nullptr,
+              width,
+              height,
+              numChannels,
+              dataType,
+              memoryType){};
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -294,7 +302,7 @@ class ImageT : public Image
             throw std::runtime_error(
               "Kompute Tensor attempted to create a zero-sized image");
         }
-              
+
         if (data.size() < width * height * numChannels) {
             throw std::runtime_error(
               "Kompute ImageT vector is smaller than the requested image size");

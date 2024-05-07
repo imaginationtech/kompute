@@ -312,8 +312,10 @@ Sequence::createCommandPool()
 
     this->mFreeCommandPool = true;
 
-    vk::CommandPoolCreateInfo commandPoolInfo(vk::CommandPoolCreateFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer),
-                                              this->mQueueIndex);
+    vk::CommandPoolCreateInfo commandPoolInfo(
+      vk::CommandPoolCreateFlags(
+        vk::CommandPoolCreateFlagBits::eResetCommandBuffer),
+      this->mQueueIndex);
     this->mCommandPool = std::make_shared<vk::CommandPool>();
     this->mDevice->createCommandPool(
       &commandPoolInfo, nullptr, this->mCommandPool.get());

@@ -74,7 +74,8 @@ Tensor::rebuild(void* data,
 
     this->allocateMemoryCreateGPUResources();
 
-    if (this->memoryType() != Memory::MemoryTypes::eStorage && data != nullptr) {
+    if (this->memoryType() != Memory::MemoryTypes::eStorage &&
+        data != nullptr) {
         this->mapRawData();
         memcpy(this->mRawData, data, this->memorySize());
     }
@@ -125,7 +126,7 @@ void
 Tensor::unmapRawData()
 {
     KP_LOG_DEBUG("Kompute Tensor unmapping data from host buffer");
-    if(!this->mUnmapMemory) {
+    if (!this->mUnmapMemory) {
         return;
     }
 
@@ -288,17 +289,17 @@ Tensor::constructDescriptorSet(vk::DescriptorSet descriptorSet,
     KP_LOG_DEBUG("Kompute Tensor construct descriptor set for binding {}",
                  binding);
 
-    mDescriptorBufferInfo =
-      this->constructDescriptorBufferInfo();
+    mDescriptorBufferInfo = this->constructDescriptorBufferInfo();
 
-    vk::WriteDescriptorSet writeDesciptorSet =  vk::WriteDescriptorSet(descriptorSet,
-                                  binding, // Destination binding
-                                  0,       // Destination array element
-                                  1,       // Descriptor count
-                                  vk::DescriptorType::eStorageBuffer,
-                                  nullptr, // Descriptor image info
-                                  // Using a member variable here means the address is still valid later
-                                  &mDescriptorBufferInfo);
+    vk::WriteDescriptorSet writeDesciptorSet = vk::WriteDescriptorSet(
+      descriptorSet,
+      binding, // Destination binding
+      0,       // Destination array element
+      1,       // Descriptor count
+      vk::DescriptorType::eStorageBuffer,
+      nullptr, // Descriptor image info
+      // Using a member variable here means the address is still valid later
+      &mDescriptorBufferInfo);
 
     return writeDesciptorSet;
 }
