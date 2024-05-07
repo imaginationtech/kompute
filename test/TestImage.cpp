@@ -15,6 +15,27 @@ TEST(TestImage, ConstructorData)
     EXPECT_EQ(image->vector(), vec);
 }
 
+TEST(TestImage, ConstructorNoData)
+{
+    kp::Manager mgr;
+
+    std::shared_ptr<kp::Image> image = mgr.image(nullptr, 3, 3, 1, kp::Image::ImageDataTypes::eF32);
+    EXPECT_EQ(image->size(), 9);
+    EXPECT_EQ(image->dataTypeMemorySize(), sizeof(float));
+
+    std::shared_ptr<kp::Image> image2 = mgr.image(3, 3, 1, kp::Image::ImageDataTypes::eF32);
+    EXPECT_EQ(image2->size(), 9);
+    EXPECT_EQ(image2->dataTypeMemorySize(), sizeof(float));
+
+    std::shared_ptr<kp::ImageT<float>> image3 = mgr.imageT<float>(3, 3, 1);
+    EXPECT_EQ(image3->size(), 9);
+    EXPECT_EQ(image3->dataTypeMemorySize(), sizeof(float));
+
+    std::shared_ptr<kp::ImageT<float>> image4 = mgr.image(3, 3, 1);
+    EXPECT_EQ(image4->size(), 9);
+    EXPECT_EQ(image4->dataTypeMemorySize(), sizeof(float));
+}
+
 // FIXME: Could use a parameterised and/or templated test here to reduce code
 // duplication.
 TEST(TestImage, DataTypes)

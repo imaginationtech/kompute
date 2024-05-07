@@ -55,6 +55,21 @@ class Tensor : public Memory
            const MemoryTypes& tensorType = MemoryTypes::eDevice);
 
     /**
+     *  Constructor without data provided which would be used to create the
+     * respective vulkan buffer and memory.
+     *
+     *  @param physicalDevice The physical device to use to fetch properties
+     *  @param device The device to use to create the buffer and memory from
+     *  @param tensorTypes Type for the tensor which is of type MemoryTypes
+     */
+    Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+              std::shared_ptr<vk::Device> device,
+              uint32_t elementTotalCount,
+              uint32_t elementMemorySize,
+              const TensorDataTypes& dataType,
+              const MemoryTypes& memoryType) : Tensor(physicalDevice, device, nullptr, elementTotalCount, elementMemorySize, dataType, memoryType) {};
+
+    /**
      * Destructor which is in charge of freeing vulkan resources unless they
      * have been provided externally.
      */
@@ -232,6 +247,21 @@ class TensorT : public Tensor
     {
         KP_LOG_DEBUG("Kompute TensorT constructor with data size {}",
                      data.size());
+    }
+
+    TensorT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+            std::shared_ptr<vk::Device> device,
+            const size_t size,
+            const MemoryTypes& tensorType = MemoryTypes::eDevice)
+      : Tensor(physicalDevice,
+               device,
+               size,
+               sizeof(T),
+               this->dataType(),
+               tensorType)
+    {
+        KP_LOG_DEBUG("Kompute TensorT constructor with data size {}",
+                     size);
     }
 
     ~TensorT() { KP_LOG_DEBUG("Kompute TensorT destructor"); }

@@ -74,7 +74,7 @@ Tensor::rebuild(void* data,
 
     this->allocateMemoryCreateGPUResources();
 
-    if (this->memoryType() != Memory::MemoryTypes::eStorage) {
+    if (this->memoryType() != Memory::MemoryTypes::eStorage && data != nullptr) {
         this->mapRawData();
         memcpy(this->mRawData, data, this->memorySize());
     }
@@ -117,13 +117,17 @@ Tensor::mapRawData()
     // flush
     this->mRawData = this->mDevice->mapMemory(
       *hostVisibleMemory, 0, bufferSize, vk::MemoryMapFlags());
+
+    this->mUnmapMemory = true;
 }
 
 void
 Tensor::unmapRawData()
 {
-
-    KP_LOG_DEBUG("Kompute Tensor mapping data from host buffer");
+    KP_LOG_DEBUG("Kompute Tensor unmapping data from host buffer");
+    if(!this->mUnmapMemory) {
+        return;
+    }
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
 
@@ -141,6 +145,8 @@ Tensor::unmapRawData()
     vk::MappedMemoryRange mappedRange(*hostVisibleMemory, 0, bufferSize);
     this->mDevice->flushMappedMemoryRanges(1, &mappedRange);
     this->mDevice->unmapMemory(*hostVisibleMemory);
+
+    this->mUnmapMemory = false;
 }
 
 void
