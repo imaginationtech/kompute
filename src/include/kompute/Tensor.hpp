@@ -191,19 +191,11 @@ class Tensor : public Memory
     vk::DescriptorBufferInfo mDescriptorBufferInfo;
 
   private:
-    // -------------- NEVER OWNED RESOURCES
-    std::shared_ptr<vk::PhysicalDevice> mPhysicalDevice;
-    std::shared_ptr<vk::Device> mDevice;
-
     // -------------- OPTIONALLY OWNED RESOURCES
     std::shared_ptr<vk::Buffer> mPrimaryBuffer;
     bool mFreePrimaryBuffer = false;
     std::shared_ptr<vk::Buffer> mStagingBuffer;
     bool mFreeStagingBuffer = false;
-    std::shared_ptr<vk::DeviceMemory> mPrimaryMemory;
-    bool mFreePrimaryMemory = false;
-    std::shared_ptr<vk::DeviceMemory> mStagingMemory;
-    bool mFreeStagingMemory = false;
 
     void allocateMemoryCreateGPUResources(); // Creates the vulkan buffer
     void createBuffer(std::shared_ptr<vk::Buffer> buffer,
@@ -228,9 +220,6 @@ class Tensor : public Memory
     vk::MemoryPropertyFlags getPrimaryMemoryPropertyFlags();
     vk::BufferUsageFlags getStagingBufferUsageFlags();
     vk::MemoryPropertyFlags getStagingMemoryPropertyFlags();
-
-    void mapRawData();
-    void unmapRawData();
 
     vk::DescriptorBufferInfo constructDescriptorBufferInfo();
 };
