@@ -187,30 +187,6 @@ class Image : public Memory
      */
     ImageDataTypes dataType();
 
-    /**
-     * Template to return the pointer data converted by specific type, which
-     * would be any of the supported types.
-     *
-     * @return Pointer to raw memory containing raw bytes data of image.
-     */
-    template<typename T>
-    T* data()
-    {
-        return (T*)this->mRawData;
-    }
-
-    /**
-     * Template to get the data of the current image as a vector of specific
-     * type, which would be any of the supported types.
-     *
-     * @return Vector of type provided by template.
-     */
-    template<typename T>
-    std::vector<T> vector()
-    {
-        return { (T*)this->mRawData, ((T*)this->mRawData) + this->size() };
-    }
-
   protected:
     // -------------- ALWAYS OWNED RESOURCES
     ImageDataTypes mDataType;
@@ -321,14 +297,12 @@ class ImageT : public Image
 
     ~ImageT() { KP_LOG_DEBUG("Kompute imageT destructor"); }
 
-    T* data() { return (T*)this->mRawData; }
-
     std::vector<T> vector()
     {
-        return { (T*)this->mRawData, ((T*)this->mRawData) + this->size() };
+        return Memory::vector<T>();
     }
 
-    T& operator[](int index) { return *(((T*)this->mRawData) + index); }
+    T& operator[](int index) { return *(Memory::data<T>() + index); }
 
     void setData(const std::vector<T>& data)
     {

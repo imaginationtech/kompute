@@ -35,6 +35,11 @@ Tensor::Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
                  elementTotalCount,
                  Memory::toString(memoryType));
 
+    if (memoryType == MemoryTypes::eStorage && data != nullptr)
+    {
+        KP_LOG_WARN("Kompute Tensor of type eStorage do not need to be initialised with data");
+    }
+
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
     this->mDataType = dataType;

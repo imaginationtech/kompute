@@ -49,6 +49,11 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           "Kompute Image attempted to create a zero-sized image");
     }
 
+    if (memoryType == MemoryTypes::eStorage && data != nullptr)
+    {
+        KP_LOG_WARN("Kompute Image of type eStorage do not need to be initialised with data");
+    }
+
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
     this->mDataType = dataType;
