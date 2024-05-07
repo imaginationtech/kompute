@@ -271,7 +271,7 @@ class Manager
         return image;
     }
 
-      std::shared_ptr<Image> image(
+    std::shared_ptr<Image> image(
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,

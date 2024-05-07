@@ -63,11 +63,18 @@ class Tensor : public Memory
      *  @param tensorTypes Type for the tensor which is of type MemoryTypes
      */
     Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-              std::shared_ptr<vk::Device> device,
-              uint32_t elementTotalCount,
-              uint32_t elementMemorySize,
-              const TensorDataTypes& dataType,
-              const MemoryTypes& memoryType) : Tensor(physicalDevice, device, nullptr, elementTotalCount, elementMemorySize, dataType, memoryType) {};
+           std::shared_ptr<vk::Device> device,
+           uint32_t elementTotalCount,
+           uint32_t elementMemorySize,
+           const TensorDataTypes& dataType,
+           const MemoryTypes& memoryType)
+      : Tensor(physicalDevice,
+               device,
+               nullptr,
+               elementTotalCount,
+               elementMemorySize,
+               dataType,
+               memoryType){};
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -260,8 +267,7 @@ class TensorT : public Tensor
                this->dataType(),
                tensorType)
     {
-        KP_LOG_DEBUG("Kompute TensorT constructor with data size {}",
-                     size);
+        KP_LOG_DEBUG("Kompute TensorT constructor with data size {}", size);
     }
 
     ~TensorT() { KP_LOG_DEBUG("Kompute TensorT destructor"); }

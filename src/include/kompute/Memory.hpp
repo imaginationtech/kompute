@@ -143,10 +143,7 @@ class Memory
      */
     uint32_t memorySize();
 
-    vk::DescriptorType getDescriptorType()
-    {
-      return mDescriptorType;
-    }
+    vk::DescriptorType getDescriptorType() { return mDescriptorType; }
 
     /**
      * Retrieve the raw data via the pointer to the memory that contains the raw
