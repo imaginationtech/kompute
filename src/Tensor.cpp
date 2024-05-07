@@ -84,70 +84,13 @@ Tensor::rebuild(void* data,
 bool
 Tensor::isInit()
 {
-    return this->mDevice && this->mPrimaryBuffer && this->mPrimaryMemory &&
-           this->mRawData;
+    return this->mDevice && this->mPrimaryBuffer && this->mPrimaryMemory;
 }
 
 kp::Tensor::TensorDataTypes
 Tensor::dataType()
 {
     return this->mDataType;
-}
-
-void
-Tensor::mapRawData()
-{
-
-    KP_LOG_DEBUG("Kompute Tensor mapping data from host buffer");
-
-    std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
-
-    if (this->mMemoryType == MemoryTypes::eHost) {
-        hostVisibleMemory = this->mPrimaryMemory;
-    } else if (this->mMemoryType == MemoryTypes::eDevice) {
-        hostVisibleMemory = this->mStagingMemory;
-    } else {
-        KP_LOG_WARN("Kompute Tensor mapping data not supported on {} tensor",
-                    Memory::toString(this->memoryType()));
-        return;
-    }
-
-    vk::DeviceSize bufferSize = this->memorySize();
-
-    // Given we request coherent host memory we don't need to invalidate /
-    // flush
-    this->mRawData = this->mDevice->mapMemory(
-      *hostVisibleMemory, 0, bufferSize, vk::MemoryMapFlags());
-
-    this->mUnmapMemory = true;
-}
-
-void
-Tensor::unmapRawData()
-{
-    KP_LOG_DEBUG("Kompute Tensor unmapping data from host buffer");
-    if (!this->mUnmapMemory) {
-        return;
-    }
-
-    std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
-
-    if (this->mMemoryType == MemoryTypes::eHost) {
-        hostVisibleMemory = this->mPrimaryMemory;
-    } else if (this->mMemoryType == MemoryTypes::eDevice) {
-        hostVisibleMemory = this->mStagingMemory;
-    } else {
-        KP_LOG_WARN("Kompute Tensor mapping data not supported on {} tensor",
-                    Memory::toString(this->memoryType()));
-        return;
-    }
-
-    vk::DeviceSize bufferSize = this->memorySize();
-    vk::MappedMemoryRange mappedRange(*hostVisibleMemory, 0, bufferSize);
-    this->mDevice->flushMappedMemoryRanges(1, &mappedRange);
-    this->mDevice->unmapMemory(*hostVisibleMemory);
-
-    this->mUnmapMemory = false;
 }
 
 void

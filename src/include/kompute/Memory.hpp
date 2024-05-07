@@ -170,6 +170,10 @@ class Memory
     template<typename T>
     T* data()
     {
+        if (this->mRawData == nullptr) {
+            this->mapRawData();
+        }
+
         return (T*)this->mRawData;
     }
 
@@ -210,6 +214,20 @@ class Memory
     void* mRawData = nullptr;
     vk::DescriptorType mDescriptorType;
     bool mUnmapMemory = false;
+
+    // -------------- NEVER OWNED RESOURCES
+    std::shared_ptr<vk::PhysicalDevice> mPhysicalDevice;
+    std::shared_ptr<vk::Device> mDevice;
+
+    // -------------- OPTIONALLY OWNED RESOURCES
+    std::shared_ptr<vk::DeviceMemory> mPrimaryMemory;
+    bool mFreePrimaryMemory = false;
+    std::shared_ptr<vk::DeviceMemory> mStagingMemory;
+    bool mFreeStagingMemory = false;
+
+    // Private util functions
+    void mapRawData();
+    void unmapRawData();
 };
 
 } // End namespace kp

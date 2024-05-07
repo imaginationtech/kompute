@@ -238,3 +238,24 @@ TEST(TestOpImageCopy, CopyImageThroughStorageViaAlgorithms)
     // Making sure the GPU holds the same vector
     EXPECT_EQ(ImageIn->vector(), ImageOut->vector());
 }
+
+TEST(TestOpImageCopy, CopyDeviceToDeviceImageUninitialised)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecA{ 1, 2, 3 };
+
+    std::shared_ptr<kp::Memory> imageA = mgr.image(testVecA, 3, 1, 1);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(3, 1, 1);
+
+    EXPECT_TRUE(imageA->isInit());
+    EXPECT_TRUE(imageB->isInit());
+
+    mgr.sequence()
+      ->eval<kp::OpImageSyncDevice>({ imageA, imageB })
+      ->eval<kp::OpImageCopy>({ imageA, imageB })
+      ->eval<kp::OpImageSyncLocal>({ imageA, imageB });
+
+    // Making sure the GPU holds the same vector
+    EXPECT_EQ(imageA->vector(), imageB->vector());
+}

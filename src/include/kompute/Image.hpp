@@ -223,19 +223,11 @@ class Image : public Memory
     std::shared_ptr<vk::ImageView> mImageView = nullptr;
 
   private:
-    // -------------- NEVER OWNED RESOURCES
-    std::shared_ptr<vk::PhysicalDevice> mPhysicalDevice;
-    std::shared_ptr<vk::Device> mDevice;
-
     // -------------- OPTIONALLY OWNED RESOURCES
     std::shared_ptr<vk::Image> mPrimaryImage;
     bool mFreePrimaryImage = false;
     std::shared_ptr<vk::Image> mStagingImage;
     bool mFreeStagingImage = false;
-    std::shared_ptr<vk::DeviceMemory> mPrimaryMemory;
-    bool mFreePrimaryMemory = false;
-    std::shared_ptr<vk::DeviceMemory> mStagingMemory;
-    bool mFreeStagingMemory = false;
 
     void allocateMemoryCreateGPUResources(); // Creates the vulkan image
     void createImage(std::shared_ptr<vk::Image> image,
@@ -261,9 +253,6 @@ class Image : public Memory
     vk::MemoryPropertyFlags getPrimaryMemoryPropertyFlags();
     vk::ImageUsageFlags getStagingImageUsageFlags();
     vk::MemoryPropertyFlags getStagingMemoryPropertyFlags();
-
-    void mapRawData();
-    void unmapRawData();
 
     constexpr size_t elementTypeSize(ImageDataTypes type);
     vk::Format getFormat();
