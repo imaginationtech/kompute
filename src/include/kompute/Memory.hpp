@@ -195,6 +195,10 @@ class Memory
     template<typename T>
     std::vector<T> vector()
     {
+        if (this->mRawData == nullptr) {
+            this->mapRawData();
+        }
+
         return { (T*)this->mRawData, ((T*)this->mRawData) + this->size() };
     }
 

@@ -261,14 +261,12 @@ class TensorT : public Tensor
 
     ~TensorT() { KP_LOG_DEBUG("Kompute TensorT destructor"); }
 
-    T* data() { return (T*)this->mRawData; }
-
     std::vector<T> vector()
     {
-        return { (T*)this->mRawData, ((T*)this->mRawData) + this->size() };
+        return Memory::vector<T>();
     }
 
-    T& operator[](int index) { return *(((T*)this->mRawData) + index); }
+    T& operator[](int index) { return *(Memory::data<T>() + index); }
 
     void setData(const std::vector<T>& data)
     {

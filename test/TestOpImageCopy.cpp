@@ -259,3 +259,66 @@ TEST(TestOpImageCopy, CopyDeviceToDeviceImageUninitialised)
     // Making sure the GPU holds the same vector
     EXPECT_EQ(imageA->vector(), imageB->vector());
 }
+
+TEST(TestOpImageCopy, CopyImageThroughStorageViaAlgorithmsUninitialisedOutput)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecIn{ 9, 1, 3 };
+
+    std::shared_ptr<kp::Memory> ImageIn = mgr.image(testVecIn, 3, 1, 1);
+    std::shared_ptr<kp::Memory> ImageOut = mgr.imageT<float>(3, 1, 1);
+
+    std::shared_ptr<kp::Memory> tensorStorage =
+      mgr.image(3, 1, 1, kp::Memory::MemoryTypes::eStorage);
+
+    EXPECT_TRUE(ImageIn->isInit());
+    EXPECT_TRUE(ImageOut->isInit());
+
+    // Copy to storage tensor through algorithm
+    std::string shaderA = (R"(
+        #version 450
+
+        layout (local_size_x = 1) in;
+
+        // The input tensors bind index is relative to index in parameter passed
+        layout(set = 0, binding = 0, r32f) uniform image2D image_in;
+        layout(set = 0, binding = 1, r32f) uniform image2D image_out;
+
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            imageStore(image_out, ivec2(index, 0), imageLoad(image_in, ivec2(index, 0))) ;
+        }
+    )");
+
+    auto algoA =
+      mgr.algorithm({ ImageIn, tensorStorage }, compileSource(shaderA));
+
+    // Copy from storage tensor to output tensor
+    std::string shaderB = (R"(
+        #version 450
+
+        layout (local_size_x = 1) in;
+
+        // The input tensors bind index is relative to index in parameter passed
+        layout(set = 0, binding = 0, r32f) uniform image2D image_in;
+        layout(set = 0, binding = 1, r32f) uniform image2D image_out;
+
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            imageStore(image_out, ivec2(index, 0), imageLoad(image_in, ivec2(index, 0))) ;
+        }
+    )");
+
+    auto algoB =
+      mgr.algorithm({ tensorStorage, ImageOut }, compileSource(shaderB));
+
+    mgr.sequence()
+      ->eval<kp::OpImageSyncDevice>({ ImageIn })
+      ->eval<kp::OpAlgoDispatch>(algoA)
+      ->eval<kp::OpAlgoDispatch>(algoB)
+      ->eval<kp::OpImageSyncLocal>({ ImageOut });
+
+    // Making sure the GPU holds the same vector
+    EXPECT_EQ(ImageIn->vector(), ImageOut->vector());
+}
