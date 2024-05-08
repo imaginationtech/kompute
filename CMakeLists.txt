@@ -121,6 +121,7 @@ include(cmake/deprecation_warnings.cmake)
 # Dependencies
 # ####################################################
 include(cmake/vulkan_shader_compiler.cmake)
+include(cmake/opencl_shader_compiler.cmake)
 include(cmake/check_vulkan_version.cmake)
 include(FetchContent)
 
