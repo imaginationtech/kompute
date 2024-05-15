@@ -25,7 +25,8 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestTensor.cpp
     TestImage.cpp
     TestOpImageCreate.cpp
-    TestOpImageCopy.cpp)
+    TestOpImageCopy.cpp
+    TestOpImageSync.cpp)
 
 target_link_libraries(kompute_tests PRIVATE GTest::gtest_main
     kompute::kompute
