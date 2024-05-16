@@ -457,7 +457,7 @@ Image::allocateMemoryCreateGPUResources()
     KP_LOG_DEBUG("Kompute Image creating primary image and memory");
 
     this->mPrimaryImage = std::make_shared<vk::Image>();
-    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags());
+    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags(), vk::ImageTiling::eOptimal);
     this->mFreePrimaryImage = true;
     this->mPrimaryMemory = std::make_shared<vk::DeviceMemory>();
     this->allocateBindMemory(this->mPrimaryImage,
@@ -470,7 +470,8 @@ Image::allocateMemoryCreateGPUResources()
 
         this->mStagingImage = std::make_shared<vk::Image>();
         this->createImage(this->mStagingImage,
-                          this->getStagingImageUsageFlags());
+                          this->getStagingImageUsageFlags(),
+                          vk::ImageTiling::eLinear);
         this->mFreeStagingImage = true;
         this->mStagingMemory = std::make_shared<vk::DeviceMemory>();
         this->allocateBindMemory(this->mStagingImage,
@@ -484,7 +485,8 @@ Image::allocateMemoryCreateGPUResources()
 
 void
 Image::createImage(std::shared_ptr<vk::Image> image,
-                   vk::ImageUsageFlags imageUsageFlags)
+                   vk::ImageUsageFlags imageUsageFlags,
+                   vk::ImageTiling imageTiling)
 {
     vk::DeviceSize imageSize = this->memorySize();
 
@@ -509,6 +511,7 @@ Image::createImage(std::shared_ptr<vk::Image> image,
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;
     imageInfo.initialLayout = vk::ImageLayout::eUndefined;
+    imageInfo.tiling = imageTiling;
 
     this->mDevice->createImage(&imageInfo, nullptr, image.get());
 }

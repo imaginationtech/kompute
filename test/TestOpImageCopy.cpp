@@ -29,6 +29,41 @@ TEST(TestOpImageCopy, CopyDeviceToDeviceImage)
     EXPECT_EQ(imageA->vector(), imageB->vector());
 }
 
+TEST(TestOpImageCopy, CopyDeviceToDeviceImage2D)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecA;
+    std::vector<float> testVecB;
+
+    for(int i = 0; i < 256; i++)
+    {
+      testVecA.push_back(i);
+      testVecB.push_back(0);
+    }
+
+    std::shared_ptr<kp::Memory> imageA = mgr.image(testVecA, 16, 16, 1);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, 16, 16, 1);
+
+    EXPECT_TRUE(imageA->isInit());
+    EXPECT_TRUE(imageB->isInit());
+
+    mgr.sequence()
+      ->eval<kp::OpImageSyncDevice>({ imageA, imageB })
+      ->eval<kp::OpImageCopy>({ imageA, imageB })
+      ->eval<kp::OpImageSyncLocal>({ imageA, imageB });
+
+    // Making sure the GPU holds the same vector
+    EXPECT_EQ(imageA->vector(), imageB->vector());
+
+    // Make sure that the vector matches the input vector
+    for(int i = 0; i < 256; i++)
+    {
+      EXPECT_EQ(imageA->vector()[i], testVecA[i]);
+      EXPECT_EQ(imageB->vector()[i], testVecA[i]);
+    }
+}
+
 TEST(TestOpImageCopy, CopyDeviceToDeviceImageMulti)
 {
     kp::Manager mgr;

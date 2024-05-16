@@ -207,7 +207,8 @@ class Image : public Memory
 
     void allocateMemoryCreateGPUResources(); // Creates the vulkan image
     void createImage(std::shared_ptr<vk::Image> image,
-                     vk::ImageUsageFlags imageUsageFlags);
+                     vk::ImageUsageFlags imageUsageFlags,
+                     vk::ImageTiling imageTiling);
     void allocateBindMemory(std::shared_ptr<vk::Image> image,
                             std::shared_ptr<vk::DeviceMemory> memory,
                             vk::MemoryPropertyFlags memoryPropertyFlags);
