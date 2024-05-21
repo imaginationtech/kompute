@@ -68,7 +68,7 @@ Memory::mapRawData()
 
     std::shared_ptr<vk::DeviceMemory> hostVisibleMemory = nullptr;
 
-    if (this->mMemoryType == MemoryTypes::eHost) {
+    if (this->mMemoryType == MemoryTypes::eHost || this->mMemoryType == MemoryTypes::eDeviceAndHost) {
         hostVisibleMemory = this->mPrimaryMemory;
     } else if (this->mMemoryType == MemoryTypes::eDevice) {
         hostVisibleMemory = this->mStagingMemory;

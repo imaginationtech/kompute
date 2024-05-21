@@ -57,3 +57,28 @@ TEST(TestOpImageCreate, ExceptionOnZeroSizeImage)
                     std::string::npos);
     }
 }
+
+TEST(TestOpImageCreate, ExceptionOnInvalidLinearImage)
+{
+    std::vector<float> testVecA;
+
+    kp::Manager mgr;
+
+    try {
+        std::shared_ptr<kp::ImageT<float>> imageA =
+          mgr.image(testVecA, 1, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost, vk::ImageTiling::eLinear);
+    } catch (const std::runtime_error& err) {
+        // check exception
+        ASSERT_TRUE(std::string(err.what()).find("linear tiling is only supported for") !=
+                    std::string::npos);
+    }
+
+    try {
+        std::shared_ptr<kp::ImageT<float>> imageA =
+          mgr.image(testVecA, 1, 1, 1, kp::Memory::MemoryTypes::eHost, vk::ImageTiling::eLinear);
+    } catch (const std::runtime_error& err) {
+        // check exception
+        ASSERT_TRUE(std::string(err.what()).find("linear tiling is only supported for") !=
+                    std::string::npos);
+    }
+}

@@ -184,7 +184,8 @@ class Manager
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
         KP_LOG_DEBUG("Kompute Manager image creation triggered");
 
@@ -195,7 +196,8 @@ class Manager
           width,
           height,
           numChannels,
-          imageType) };
+          imageType,
+          tiling) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);
@@ -209,7 +211,8 @@ class Manager
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
         KP_LOG_DEBUG("Kompute Manager image creation triggered");
 
@@ -219,7 +222,8 @@ class Manager
           width,
           height,
           numChannels,
-          imageType) };
+          imageType,
+          tiling) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);
@@ -233,18 +237,20 @@ class Manager
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
-        return this->imageT<float>(data, width, height, numChannels, imageType);
+        return this->imageT<float>(data, width, height, numChannels, imageType, tiling);
     }
 
     std::shared_ptr<ImageT<float>> image(
       uint32_t width,
       uint32_t height,
       uint32_t numChannels,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
-        return this->imageT<float>(width, height, numChannels, imageType);
+        return this->imageT<float>(width, height, numChannels, imageType, tiling);
     }
 
     std::shared_ptr<Image> image(
@@ -253,7 +259,8 @@ class Manager
       uint32_t height,
       uint32_t numChannels,
       const Image::ImageDataTypes& dataType,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
         std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
                                                     this->mDevice,
@@ -262,7 +269,8 @@ class Manager
                                                     height,
                                                     numChannels,
                                                     dataType,
-                                                    imageType) };
+                                                    imageType,
+                                                    tiling) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);
@@ -276,7 +284,8 @@ class Manager
       uint32_t height,
       uint32_t numChannels,
       const Image::ImageDataTypes& dataType,
-      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
+      Image::MemoryTypes imageType = Image::MemoryTypes::eDevice,
+      vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
     {
         std::shared_ptr<Image> image{ new kp::Image(this->mPhysicalDevice,
                                                     this->mDevice,
@@ -284,7 +293,8 @@ class Manager
                                                     height,
                                                     numChannels,
                                                     dataType,
-                                                    imageType) };
+                                                    imageType,
+                                                    tiling) };
 
         if (this->mManageResources) {
             this->mManagedImages.push_back(image);

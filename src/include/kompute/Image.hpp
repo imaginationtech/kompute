@@ -45,6 +45,8 @@ class Image : public Memory
      *  @param height Height of the image in pixels
      *  @param dataType Data type for the image which is of type ImageDataTypes
      *  @param imageType Type for the image which is of type MemoryTypes
+     *  @param tiling Tiling mode to use for the image. Defaults to optimal
+     *  but can be eLinear instead.
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           std::shared_ptr<vk::Device> device,
@@ -53,7 +55,8 @@ class Image : public Memory
           uint32_t height,
           uint32_t numChannels,
           const ImageDataTypes& dataType,
-          const MemoryTypes& imageType = MemoryTypes::eDevice);
+          const MemoryTypes& memoryType = MemoryTypes::eDevice,
+          vk::ImageTiling tiling = vk::ImageTiling::eOptimal);
 
     /**
      *  Constructor with no data provided.
@@ -64,6 +67,8 @@ class Image : public Memory
      *  @param height Height of the image in pixels
      *  @param dataType Data type for the image which is of type ImageDataTypes
      *  @param imageType Type for the image which is of type MemoryTypes
+     *  @param tiling Tiling mode to use for the image. Defaults to optimal
+     *  but can be eLinear instead.
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           std::shared_ptr<vk::Device> device,
@@ -71,7 +76,8 @@ class Image : public Memory
           uint32_t height,
           uint32_t numChannels,
           const ImageDataTypes& dataType,
-          const MemoryTypes& memoryType)
+          const MemoryTypes& memoryType = MemoryTypes::eDevice,
+          vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
       : Image(physicalDevice,
               device,
               nullptr,
@@ -79,7 +85,8 @@ class Image : public Memory
               height,
               numChannels,
               dataType,
-              memoryType){};
+              memoryType,
+              tiling){};
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -197,6 +204,7 @@ class Image : public Memory
     vk::ImageLayout mPrimaryImageLayout = vk::ImageLayout::eUndefined;
     vk::ImageLayout mStagingImageLayout = vk::ImageLayout::eUndefined;
     std::shared_ptr<vk::ImageView> mImageView = nullptr;
+    vk::ImageTiling mTiling = vk::ImageTiling::eOptimal;
 
   private:
     // -------------- OPTIONALLY OWNED RESOURCES
@@ -248,7 +256,8 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-           const MemoryTypes& imageType = MemoryTypes::eDevice)
+           const MemoryTypes& imageType = MemoryTypes::eDevice,
+           vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
       : Image(physicalDevice,
               device,
               (void*)data.data(),
@@ -256,7 +265,8 @@ class ImageT : public Image
               height,
               numChannels,
               this->dataType(),
-              imageType)
+              imageType,
+              tiling)
     {
         KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, "
                      "height {}, and num channels {}",
@@ -280,14 +290,16 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-           const MemoryTypes& imageType = MemoryTypes::eDevice)
+           const MemoryTypes& imageType = MemoryTypes::eDevice,
+           vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
       : Image(physicalDevice,
               device,
               width,
               height,
               numChannels,
               this->dataType(),
-              imageType)
+              imageType,
+              tiling)
     {
         KP_LOG_DEBUG("Kompute imageT constructor with no data, width {}, "
                      "height {}, and num channels {}",
