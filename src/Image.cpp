@@ -36,7 +36,8 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
              uint32_t height,
              uint32_t numChannels,
              const ImageDataTypes& dataType,
-             const MemoryTypes& memoryType)
+             const MemoryTypes& memoryType,
+             vk::ImageTiling tiling)
 {
     KP_LOG_DEBUG(
       "Kompute Image constructor data width: {}, height: {}, and type: {}",
@@ -54,6 +55,12 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
         KP_LOG_WARN("Kompute Image of type eStorage do not need to be initialised with data");
     }
 
+    if (tiling == vk::ImageTiling::eLinear && 
+        (memoryType != Memory::MemoryTypes::eDevice || memoryType != Memory::MemoryTypes::eStorage))
+    {
+        throw std::runtime_error("Kompute Image with linear tiling is only supported for eDevice and eStorage images");
+    }
+
     this->mPhysicalDevice = physicalDevice;
     this->mDevice = device;
     this->mDataType = dataType;
@@ -62,6 +69,7 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
     this->mHeight = height;
     this->mNumChannels = numChannels;
     this->mDescriptorType = vk::DescriptorType::eStorageImage;
+    this->mTiling = tiling;
 
     this->rebuild(data);
 }
@@ -375,11 +383,8 @@ Image::getPrimaryImageUsageFlags()
 {
     switch (this->mMemoryType) {
         case MemoryTypes::eDevice:
-            return vk::ImageUsageFlagBits::eStorage |
-                   vk::ImageUsageFlagBits::eTransferSrc |
-                   vk::ImageUsageFlagBits::eTransferDst;
-            break;
         case MemoryTypes::eHost:
+        case MemoryTypes::eDeviceAndHost:
             return vk::ImageUsageFlagBits::eStorage |
                    vk::ImageUsageFlagBits::eTransferSrc |
                    vk::ImageUsageFlagBits::eTransferDst;
@@ -393,7 +398,7 @@ Image::getPrimaryImageUsageFlags()
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
         default:
-            throw std::runtime_error("Kompute Image invalid Image type");
+            throw std::runtime_error("Kompute Image invalid image type");
     }
 }
 
@@ -408,11 +413,15 @@ Image::getPrimaryMemoryPropertyFlags()
             return vk::MemoryPropertyFlagBits::eHostVisible |
                    vk::MemoryPropertyFlagBits::eHostCoherent;
             break;
+        case MemoryTypes::eDeviceAndHost:
+            return vk::MemoryPropertyFlagBits::eDeviceLocal |
+                   vk::MemoryPropertyFlagBits::eHostVisible |
+                   vk::MemoryPropertyFlagBits::eHostCoherent;
         case MemoryTypes::eStorage:
             return vk::MemoryPropertyFlagBits::eDeviceLocal;
             break;
         default:
-            throw std::runtime_error("Kompute Image invalid Image type");
+            throw std::runtime_error("Kompute Image invalid image type");
     }
 }
 
@@ -425,7 +434,7 @@ Image::getStagingImageUsageFlags()
                    vk::ImageUsageFlagBits::eTransferDst;
             break;
         default:
-            throw std::runtime_error("Kompute Image invalid Image type");
+            throw std::runtime_error("Kompute Image invalid image type");
     }
 }
 
@@ -438,7 +447,7 @@ Image::getStagingMemoryPropertyFlags()
                    vk::MemoryPropertyFlagBits::eHostCoherent;
             break;
         default:
-            throw std::runtime_error("Kompute Image invalid Image type");
+            throw std::runtime_error("Kompute Image invalid image type");
     }
 }
 
@@ -457,7 +466,7 @@ Image::allocateMemoryCreateGPUResources()
     KP_LOG_DEBUG("Kompute Image creating primary image and memory");
 
     this->mPrimaryImage = std::make_shared<vk::Image>();
-    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags(), vk::ImageTiling::eOptimal);
+    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags(), this->mTiling);
     this->mFreePrimaryImage = true;
     this->mPrimaryMemory = std::make_shared<vk::DeviceMemory>();
     this->allocateBindMemory(this->mPrimaryImage,
@@ -673,7 +682,7 @@ Image::elementTypeSize(Image::ImageDataTypes type)
         case Image::ImageDataTypes::eF32:
             return sizeof(float);
         default:
-            throw std::runtime_error("Kompute Image invalid Image data type");
+            throw std::runtime_error("Kompute Image invalid image data type");
             break;
     }
 

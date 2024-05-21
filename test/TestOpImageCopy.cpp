@@ -172,6 +172,28 @@ TEST(TestOpImageCopy, CopyHostToHostImage)
     EXPECT_EQ(imageA->vector(), imageB->vector());
 }
 
+TEST(TestOpImageCopy, CopyDeviceAndHostToDeviceAndHostImage)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecA{ 1, 2, 3 };
+    std::vector<float> testVecB{ 0, 0, 0 };
+
+    std::shared_ptr<kp::Memory> imageA = mgr.image(testVecA, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
+
+    EXPECT_TRUE(imageA->isInit());
+    EXPECT_TRUE(imageB->isInit());
+
+    mgr.sequence()
+      ->eval<kp::OpImageSyncDevice>({ imageA, imageB })
+      ->eval<kp::OpImageCopy>({ imageA, imageB })
+      ->eval<kp::OpImageSyncLocal>({ imageA, imageB });
+
+    // Making sure the GPU holds the same vector
+    EXPECT_EQ(imageA->vector(), imageB->vector());
+}
+
 TEST(TestOpImageCopy, SingleImageShouldFail)
 {
     kp::Manager mgr;
