@@ -35,7 +35,7 @@ class Image : public Memory
 
     /**
      *  Constructor with data provided which would be used to create the
-     * respective vulkan image and memory.
+     *  respective vulkan image and memory.
      *
      *  @param physicalDevice The physical device to use to fetch properties
      *  @param device The device to use to create the image and memory from
@@ -44,9 +44,8 @@ class Image : public Memory
      *  @param width Width of the image in pixels
      *  @param height Height of the image in pixels
      *  @param dataType Data type for the image which is of type ImageDataTypes
-     *  @param imageType Type for the image which is of type MemoryTypes
-     *  @param tiling Tiling mode to use for the image. Defaults to optimal
-     *  but can be eLinear instead.
+     *  @param memoryType Type for the image which is of type MemoryTypes
+     *  @param tiling Tiling mode to use for the image.
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           std::shared_ptr<vk::Device> device,
@@ -55,8 +54,8 @@ class Image : public Memory
           uint32_t height,
           uint32_t numChannels,
           const ImageDataTypes& dataType,
-          const MemoryTypes& memoryType = MemoryTypes::eDevice,
-          vk::ImageTiling tiling = vk::ImageTiling::eOptimal);
+          vk::ImageTiling tiling,
+          const MemoryTypes& memoryType = MemoryTypes::eDevice) { init(physicalDevice, device, data, width, height, numChannels, dataType, tiling, memoryType); }
 
     /**
      *  Constructor with no data provided.
@@ -66,9 +65,8 @@ class Image : public Memory
      *  @param width Width of the image in pixels
      *  @param height Height of the image in pixels
      *  @param dataType Data type for the image which is of type ImageDataTypes
-     *  @param imageType Type for the image which is of type MemoryTypes
-     *  @param tiling Tiling mode to use for the image. Defaults to optimal
-     *  but can be eLinear instead.
+     *  @param memoryType Type for the image which is of type MemoryTypes
+     *  @param tiling Tiling mode to use for the image.
      */
     Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           std::shared_ptr<vk::Device> device,
@@ -76,8 +74,8 @@ class Image : public Memory
           uint32_t height,
           uint32_t numChannels,
           const ImageDataTypes& dataType,
-          const MemoryTypes& memoryType = MemoryTypes::eDevice,
-          vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
+          vk::ImageTiling tiling,
+          const MemoryTypes& memoryType = MemoryTypes::eDevice)
       : Image(physicalDevice,
               device,
               nullptr,
@@ -85,8 +83,86 @@ class Image : public Memory
               height,
               numChannels,
               dataType,
-              memoryType,
-              tiling){};
+              tiling,
+              memoryType){}
+
+    /**
+     *  Constructor with data provided which would be used to create the
+     *  respective vulkan image and memory. No tiling has been provided
+     *  so will be inferred from \p memoryType.
+     *
+     *  @param physicalDevice The physical device to use to fetch properties
+     *  @param device The device to use to create the image and memory from
+     *  @param data Non-zero-sized vector of data that will be used by the
+     * image
+     *  @param width Width of the image in pixels
+     *  @param height Height of the image in pixels
+     *  @param dataType Data type for the image which is of type ImageDataTypes
+     *  @param memoryType Type for the image which is of type MemoryTypes
+     *  @param tiling Tiling mode to use for the image.
+     */
+    Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+          std::shared_ptr<vk::Device> device,
+          void* data,
+          uint32_t width,
+          uint32_t height,
+          uint32_t numChannels,
+          const ImageDataTypes& dataType,
+          const MemoryTypes& memoryType = MemoryTypes::eDevice)
+    {
+      vk::ImageTiling tiling;
+
+      if (memoryType == MemoryTypes::eHost || memoryType == MemoryTypes::eDeviceAndHost)
+      {
+        // Host-accessible memory must be linear-tiled.
+        tiling = vk::ImageTiling::eLinear;
+      }
+      else if(memoryType == MemoryTypes::eDevice || memoryType == MemoryTypes::eStorage)
+      {
+        tiling = vk::ImageTiling::eOptimal;
+      }
+      else
+      {
+        KP_LOG_ERROR("Kompute Image unsupported memory type");
+      }
+
+      init(physicalDevice,
+              device,
+              data,
+              width,
+              height,
+              numChannels,
+              dataType,
+              tiling,
+              memoryType);
+    }
+
+    /**
+     *  Constructor with no data provided. No tiling has been provided
+     *  so will be inferred from \p memoryType.
+     *
+     *  @param physicalDevice The physical device to use to fetch properties
+     *  @param device The device to use to create the image and memory from
+     *  @param width Width of the image in pixels
+     *  @param height Height of the image in pixels
+     *  @param dataType Data type for the image which is of type ImageDataTypes
+     *  @param memoryType Type for the image which is of type MemoryTypes
+     */
+    Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+          std::shared_ptr<vk::Device> device,
+          uint32_t width,
+          uint32_t height,
+          uint32_t numChannels,
+          const ImageDataTypes& dataType,
+          const MemoryTypes& memoryType = MemoryTypes::eDevice)
+      : Image(physicalDevice,
+              device,
+              nullptr,
+              width,
+              height,
+              numChannels,
+              dataType,
+              memoryType){}  
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -243,6 +319,16 @@ class Image : public Memory
     vk::Format getFormat();
 
     vk::DescriptorImageInfo constructDescriptorImageInfo();
+
+    void init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+          std::shared_ptr<vk::Device> device,
+          void* data,
+          uint32_t width,
+          uint32_t height,
+          uint32_t numChannels,
+          const ImageDataTypes& dataType,
+          vk::ImageTiling tiling,
+          const MemoryTypes& memoryType = MemoryTypes::eDevice);
 };
 
 template<typename T>
@@ -256,8 +342,8 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-           const MemoryTypes& imageType = MemoryTypes::eDevice,
-           vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
+            vk::ImageTiling tiling,
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
       : Image(physicalDevice,
               device,
               (void*)data.data(),
@@ -265,8 +351,41 @@ class ImageT : public Image
               height,
               numChannels,
               this->dataType(),
-              imageType,
-              tiling)
+              tiling,
+              imageType)
+    {
+        KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, "
+                     "height {}, and num channels {}",
+                     data.size(),
+                     width,
+                     height,
+                     numChannels);
+        if (data.size() == 0) {
+            throw std::runtime_error(
+              "Kompute Tensor attempted to create a zero-sized image");
+        }
+
+        if (data.size() < width * height * numChannels) {
+            throw std::runtime_error(
+              "Kompute ImageT vector is smaller than the requested image size");
+        }
+    }
+
+    ImageT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+           std::shared_ptr<vk::Device> device,
+           const std::vector<T>& data,
+           uint32_t width,
+           uint32_t height,
+           uint32_t numChannels,
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
+      : Image(physicalDevice,
+              device,
+              (void*)data.data(),
+              width,
+              height,
+              numChannels,
+              this->dataType(),
+              imageType)
     {
         KP_LOG_DEBUG("Kompute imageT constructor with data size {}, width {}, "
                      "height {}, and num channels {}",
@@ -290,16 +409,37 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-           const MemoryTypes& imageType = MemoryTypes::eDevice,
-           vk::ImageTiling tiling = vk::ImageTiling::eOptimal)
+           vk::ImageTiling tiling,
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
       : Image(physicalDevice,
               device,
               width,
               height,
               numChannels,
               this->dataType(),
-              imageType,
-              tiling)
+              tiling,
+              imageType)
+    {
+        KP_LOG_DEBUG("Kompute imageT constructor with no data, width {}, "
+                     "height {}, and num channels {}",
+                     width,
+                     height,
+                     numChannels);
+    }
+
+    ImageT(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+           std::shared_ptr<vk::Device> device,
+           uint32_t width,
+           uint32_t height,
+           uint32_t numChannels,
+           const MemoryTypes& imageType = MemoryTypes::eDevice)
+      : Image(physicalDevice,
+              device,
+              width,
+              height,
+              numChannels,
+              this->dataType(),
+              imageType)
     {
         KP_LOG_DEBUG("Kompute imageT constructor with no data, width {}, "
                      "height {}, and num channels {}",

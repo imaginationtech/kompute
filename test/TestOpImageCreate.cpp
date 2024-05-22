@@ -58,7 +58,7 @@ TEST(TestOpImageCreate, ExceptionOnZeroSizeImage)
     }
 }
 
-TEST(TestOpImageCreate, ExceptionOnInvalidLinearImage)
+TEST(TestOpImageCreate, ExceptionOnInvalidTiledImage)
 {
     std::vector<float> testVecA;
 
@@ -66,19 +66,19 @@ TEST(TestOpImageCreate, ExceptionOnInvalidLinearImage)
 
     try {
         std::shared_ptr<kp::ImageT<float>> imageA =
-          mgr.image(testVecA, 1, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost, vk::ImageTiling::eLinear);
+          mgr.image(testVecA, 1, 1, 1, vk::ImageTiling::eOptimal, kp::Memory::MemoryTypes::eDeviceAndHost);
     } catch (const std::runtime_error& err) {
         // check exception
-        ASSERT_TRUE(std::string(err.what()).find("linear tiling is only supported for") !=
+        ASSERT_TRUE(std::string(err.what()).find("optimal tiling is only supported for") !=
                     std::string::npos);
     }
 
     try {
         std::shared_ptr<kp::ImageT<float>> imageA =
-          mgr.image(testVecA, 1, 1, 1, kp::Memory::MemoryTypes::eHost, vk::ImageTiling::eLinear);
+          mgr.image(testVecA, 1, 1, 1, vk::ImageTiling::eOptimal, kp::Memory::MemoryTypes::eHost);
     } catch (const std::runtime_error& err) {
         // check exception
-        ASSERT_TRUE(std::string(err.what()).find("linear tiling is only supported for") !=
+        ASSERT_TRUE(std::string(err.what()).find("optimal tiling is only supported for") !=
                     std::string::npos);
     }
 }
