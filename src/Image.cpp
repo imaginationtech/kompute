@@ -29,15 +29,15 @@ Image::toString(Image::ImageDataTypes dt)
     }
 }
 
-Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+void Image::init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
              std::shared_ptr<vk::Device> device,
              void* data,
              uint32_t width,
              uint32_t height,
              uint32_t numChannels,
              const ImageDataTypes& dataType,
-             const MemoryTypes& memoryType,
-             vk::ImageTiling tiling)
+             vk::ImageTiling tiling,
+             const MemoryTypes& memoryType)
 {
     KP_LOG_DEBUG(
       "Kompute Image constructor data width: {}, height: {}, and type: {}",
@@ -55,10 +55,10 @@ Image::Image(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
         KP_LOG_WARN("Kompute Image of type eStorage do not need to be initialised with data");
     }
 
-    if (tiling == vk::ImageTiling::eLinear && 
-        (memoryType != Memory::MemoryTypes::eDevice || memoryType != Memory::MemoryTypes::eStorage))
+    if (tiling == vk::ImageTiling::eOptimal && 
+        (memoryType != Memory::MemoryTypes::eDevice && memoryType != Memory::MemoryTypes::eStorage))
     {
-        throw std::runtime_error("Kompute Image with linear tiling is only supported for eDevice and eStorage images");
+        throw std::runtime_error("Kompute Image with optimal tiling is only supported for eDevice and eStorage images");
     }
 
     this->mPhysicalDevice = physicalDevice;
