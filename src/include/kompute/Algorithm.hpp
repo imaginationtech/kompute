@@ -268,9 +268,9 @@ class Algorithm
                  ((T*)this->mPushConstantsData) + this->mPushConstantsSize };
     }
     /**
-     * Gets the current tensors that are used in the algorithm.
+     * Gets the current memory objects that are used in the algorithm.
      *
-     * @returns The list of tensors used in the algorithm.
+     * @returns The list of memory objects used in the algorithm.
      */
     const std::vector<std::shared_ptr<Memory>>& getMemObjects();
 
