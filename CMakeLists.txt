@@ -28,6 +28,10 @@ else ()
     set(kompute_opt_install_default_val OFF)
 endif ()
 
+# Set -fPIC so that ../lib/kp.cpython-310-x86_64-linux-gnu.so links correctly
+# FIXME: Is there a neater fix?
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # ####################################################
 # Options
 # ####################################################
