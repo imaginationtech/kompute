@@ -65,16 +65,19 @@ PYBIND11_MODULE(kp, m)
 
     py::module_ np = py::module_::import("numpy");
 
-    py::enum_<kp::Tensor::TensorTypes>(m, "TensorTypes")
+    py::enum_<kp::Memory::MemoryTypes>(m, "MemoryTypes")
       .value("device",
-             kp::Tensor::TensorTypes::eDevice,
-             DOC(kp, Tensor, TensorTypes, eDevice))
+             kp::Memory::MemoryTypes::eDevice,
+             DOC(kp, Memory, MemoryTypes, eDevice))
       .value("host",
-             kp::Tensor::TensorTypes::eHost,
-             DOC(kp, Tensor, TensorTypes, eHost))
+             kp::Memory::MemoryTypes::eHost,
+             DOC(kp, Memory, MemoryTypes, eHost))
       .value("storage",
-             kp::Tensor::TensorTypes::eStorage,
-             DOC(kp, Tensor, TensorTypes, eStorage))
+             kp::Memory::MemoryTypes::eStorage,
+             DOC(kp, Memory, MemoryTypes, eStorage))
+      .value("deviceAndHost",
+             kp::Memory::MemoryTypes::eDeviceAndHost,
+             DOC(kp, Memory, MemoryTypes, eDeviceAndHost))
       .export_values();
 
     py::class_<kp::OpBase, std::shared_ptr<kp::OpBase>>(
@@ -84,19 +87,19 @@ PYBIND11_MODULE(kp, m)
                kp::OpBase,
                std::shared_ptr<kp::OpTensorSyncDevice>>(
       m, "OpTensorSyncDevice", DOC(kp, OpTensorSyncDevice))
-      .def(py::init<const std::vector<std::shared_ptr<kp::Tensor>>&>(),
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
            DOC(kp, OpTensorSyncDevice, OpTensorSyncDevice));
 
     py::class_<kp::OpTensorSyncLocal,
                kp::OpBase,
                std::shared_ptr<kp::OpTensorSyncLocal>>(
       m, "OpTensorSyncLocal", DOC(kp, OpTensorSyncLocal))
-      .def(py::init<const std::vector<std::shared_ptr<kp::Tensor>>&>(),
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
            DOC(kp, OpTensorSyncLocal, OpTensorSyncLocal));
 
     py::class_<kp::OpTensorCopy, kp::OpBase, std::shared_ptr<kp::OpTensorCopy>>(
       m, "OpTensorCopy", DOC(kp, OpTensorCopy))
-      .def(py::init<const std::vector<std::shared_ptr<kp::Tensor>>&>(),
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
            DOC(kp, OpTensorCopy, OpTensorCopy));
 
     py::class_<kp::OpAlgoDispatch,
@@ -115,15 +118,15 @@ PYBIND11_MODULE(kp, m)
 
     py::class_<kp::OpMult, kp::OpBase, std::shared_ptr<kp::OpMult>>(
       m, "OpMult", DOC(kp, OpMult))
-      .def(py::init<const std::vector<std::shared_ptr<kp::Tensor>>&,
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&,
                     const std::shared_ptr<kp::Algorithm>&>(),
            DOC(kp, OpMult, OpMult));
 
     py::class_<kp::Algorithm, std::shared_ptr<kp::Algorithm>>(
       m, "Algorithm", DOC(kp, Algorithm, Algorithm))
       .def("get_tensors",
-           &kp::Algorithm::getTensors,
-           DOC(kp, Algorithm, getTensors))
+           &kp::Algorithm::getMemObjects,
+           DOC(kp, Algorithm, getMemObjects))
       .def("destroy", &kp::Algorithm::destroy, DOC(kp, Algorithm, destroy))
       .def("is_init", &kp::Algorithm::isInit, DOC(kp, Algorithm, isInit));
 
@@ -157,7 +160,7 @@ PYBIND11_MODULE(kp, m)
         DOC(kp, Tensor, data))
       .def("size", &kp::Tensor::size, DOC(kp, Tensor, size))
       .def("__len__", &kp::Tensor::size, DOC(kp, Tensor, size))
-      .def("tensor_type", &kp::Tensor::tensorType, DOC(kp, Tensor, tensorType))
+      .def("memory_type", &kp::Memory::memoryType, DOC(kp, Memory, memoryType))
       .def("data_type", &kp::Tensor::dataType, DOC(kp, Tensor, dataType))
       .def("is_init", &kp::Tensor::isInit, DOC(kp, Tensor, isInit))
       .def("destroy", &kp::Tensor::destroy, DOC(kp, Tensor, destroy));
@@ -230,7 +233,7 @@ PYBIND11_MODULE(kp, m)
         "tensor",
         [np](kp::Manager& self,
              const py::array_t<float>& data,
-             kp::Tensor::TensorTypes tensor_type) {
+             kp::Memory::MemoryTypes memory_type) {
             const py::array_t<float>& flatdata = np.attr("ravel")(data);
             const py::buffer_info info = flatdata.request();
             KP_LOG_DEBUG("Kompute Python Manager tensor() creating tensor "
@@ -240,16 +243,16 @@ PYBIND11_MODULE(kp, m)
                                flatdata.size(),
                                sizeof(float),
                                kp::Tensor::TensorDataTypes::eFloat,
-                               tensor_type);
+                               memory_type);
         },
         DOC(kp, Manager, tensor),
         py::arg("data"),
-        py::arg("tensor_type") = kp::Tensor::TensorTypes::eDevice)
+        py::arg("memory_type") = kp::Memory::MemoryTypes::eDevice)
       .def(
         "tensor_t",
         [np](kp::Manager& self,
              const py::array& data,
-             kp::Tensor::TensorTypes tensor_type) {
+             kp::Memory::MemoryTypes memory_type) {
             // TODO: Suppport strides in numpy format
             const py::array& flatdata = np.attr("ravel")(data);
             const py::buffer_info info = flatdata.request();
@@ -262,31 +265,31 @@ PYBIND11_MODULE(kp, m)
                                    flatdata.size(),
                                    sizeof(float),
                                    kp::Tensor::TensorDataTypes::eFloat,
-                                   tensor_type);
+                                   memory_type);
             } else if (flatdata.dtype().is(py::dtype::of<std::uint32_t>())) {
                 return self.tensor(info.ptr,
                                    flatdata.size(),
                                    sizeof(uint32_t),
                                    kp::Tensor::TensorDataTypes::eUnsignedInt,
-                                   tensor_type);
+                                   memory_type);
             } else if (flatdata.dtype().is(py::dtype::of<std::int32_t>())) {
                 return self.tensor(info.ptr,
                                    flatdata.size(),
                                    sizeof(int32_t),
                                    kp::Tensor::TensorDataTypes::eInt,
-                                   tensor_type);
+                                   memory_type);
             } else if (flatdata.dtype().is(py::dtype::of<std::double_t>())) {
                 return self.tensor(info.ptr,
                                    flatdata.size(),
                                    sizeof(double),
                                    kp::Tensor::TensorDataTypes::eDouble,
-                                   tensor_type);
+                                   memory_type);
             } else if (flatdata.dtype().is(py::dtype::of<bool>())) {
                 return self.tensor(info.ptr,
                                    flatdata.size(),
                                    sizeof(bool),
                                    kp::Tensor::TensorDataTypes::eBool,
-                                   tensor_type);
+                                   memory_type);
             } else {
                 throw std::runtime_error(
                   "Kompute Python no valid dtype supported");
@@ -294,11 +297,11 @@ PYBIND11_MODULE(kp, m)
         },
         DOC(kp, Manager, tensorT),
         py::arg("data"),
-        py::arg("tensor_type") = kp::Tensor::TensorTypes::eDevice)
+        py::arg("memory_type") = kp::Memory::MemoryTypes::eDevice)
       .def(
         "algorithm",
         [](kp::Manager& self,
-           const std::vector<std::shared_ptr<kp::Tensor>>& tensors,
+           const std::vector<std::shared_ptr<kp::Memory>>& tensors,
            const py::bytes& spirv,
            const kp::Workgroup& workgroup,
            const std::vector<float>& spec_consts,
@@ -320,7 +323,7 @@ PYBIND11_MODULE(kp, m)
       .def(
         "algorithm",
         [np](kp::Manager& self,
-             const std::vector<std::shared_ptr<kp::Tensor>>& tensors,
+             const std::vector<std::shared_ptr<kp::Memory>>& tensors,
              const py::bytes& spirv,
              const kp::Workgroup& workgroup,
              const py::array& spec_consts,

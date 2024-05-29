@@ -61,7 +61,7 @@ R"doc(Gets the specialization constants of the current algorithm.
 
 @returns The std::vector<float> currently set for specialization constants)doc";
 
-static const char *__doc_kp_Algorithm_getTensors =
+static const char *__doc_kp_Algorithm_getMemObjects =
 R"doc(Gets the current tensors that are used in the algorithm.
 
 @returns The list of tensors used in the algorithm.)doc";
@@ -719,17 +719,19 @@ static const char *__doc_kp_Tensor_TensorDataTypes_eInt = R"doc()doc";
 
 static const char *__doc_kp_Tensor_TensorDataTypes_eUnsignedInt = R"doc()doc";
 
-static const char *__doc_kp_Tensor_TensorTypes =
+static const char *__doc_kp_Memory_MemoryTypes =
 R"doc(Type for tensors created: Device allows memory to be transferred from
 staging buffers. Staging are host memory visible. Storage are device
 visible but are not set up to transfer or receive data (only for
 shader storage).)doc";
 
-static const char *__doc_kp_Tensor_TensorTypes_eDevice = R"doc(< Type is device memory, source and destination)doc";
+static const char *__doc_kp_Memory_MemoryTypes_eDevice = R"doc(< Type is device memory, source and destination)doc";
 
-static const char *__doc_kp_Tensor_TensorTypes_eHost = R"doc(< Type is host memory, source and destination)doc";
+static const char *__doc_kp_Memory_MemoryTypes_eHost = R"doc(< Type is host memory, source and destination)doc";
 
-static const char *__doc_kp_Tensor_TensorTypes_eStorage = R"doc(< Type is Device memory (only))doc";
+static const char *__doc_kp_Memory_MemoryTypes_eStorage = R"doc(< Type is Device memory (only))doc";
+
+static const char *__doc_kp_Memory_MemoryTypes_eDeviceAndHost = R"doc()doc";
 
 static const char *__doc_kp_Tensor_allocateBindMemory = R"doc()doc";
 
@@ -864,7 +866,7 @@ number of elements across all dimensions
 
 @return Unsigned integer representing the total number of elements)doc";
 
-static const char *__doc_kp_Tensor_tensorType =
+static const char *__doc_kp_Memory_memoryType =
 R"doc(Retrieve the tensor type of the Tensor
 
 @return Tensor type of tensor)doc";
