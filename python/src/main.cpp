@@ -168,6 +168,18 @@ PYBIND11_MODULE(kp, m)
                 case kp::Tensor::TensorDataTypes::eInt:
                     return py::array(
                       self.size(), self.data<int32_t>(), py::cast(&self));
+                case kp::Tensor::TensorDataTypes::eUnsignedShort:
+                    return py::array(
+                      self.size(), self.data<uint16_t>(), py::cast(&self));
+                case kp::Tensor::TensorDataTypes::eShort:
+                    return py::array(
+                      self.size(), self.data<int16_t>(), py::cast(&self));
+                case kp::Tensor::TensorDataTypes::eUnsignedChar:
+                    return py::array(
+                      self.size(), self.data<uint8_t>(), py::cast(&self));
+                case kp::Tensor::TensorDataTypes::eChar:
+                    return py::array(
+                      self.size(), self.data<int8_t>(), py::cast(&self));
                 case kp::Tensor::TensorDataTypes::eDouble:
                     return py::array(
                       self.size(), self.data<double>(), py::cast(&self));
@@ -340,6 +352,30 @@ PYBIND11_MODULE(kp, m)
                                    flatdata.size(),
                                    sizeof(int32_t),
                                    kp::Tensor::TensorDataTypes::eInt,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::uint16_t>())) {
+                return self.tensor(info.ptr,
+                                   flatdata.size(),
+                                   sizeof(uint16_t),
+                                   kp::Tensor::TensorDataTypes::eUnsignedShort,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::int16_t>())) {
+                return self.tensor(info.ptr,
+                                   flatdata.size(),
+                                   sizeof(int16_t),
+                                   kp::Tensor::TensorDataTypes::eShort,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::uint8_t>())) {
+                return self.tensor(info.ptr,
+                                   flatdata.size(),
+                                   sizeof(uint8_t),
+                                   kp::Tensor::TensorDataTypes::eUnsignedChar,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::int8_t>())) {
+                return self.tensor(info.ptr,
+                                   flatdata.size(),
+                                   sizeof(int8_t),
+                                   kp::Tensor::TensorDataTypes::eChar,
                                    memory_type);
             } else if (flatdata.dtype().is(py::dtype::of<std::double_t>())) {
                 return self.tensor(info.ptr,

@@ -88,8 +88,8 @@ def test_type_float_double_incorrect():
                     reason="Broadcom doesn't support double")
 @pytest.mark.skipif("swiftshader" in VK_ICD_FILENAMES,
                     reason="Swiftshader doesn't support double")
-def test_type_double():
 
+def test_type_double():
     shader = """
         #version 450
         layout(set = 0, binding = 0) buffer tensorLhs { double valuesLhs[]; };
@@ -189,6 +189,170 @@ def test_type_unsigned_int():
     arr_in_a = np.array([123, 153, 231], dtype=np.uint32)
     arr_in_b = np.array([9482, 1208, 1238], dtype=np.uint32)
     arr_out = np.array([0, 0, 0], dtype=np.uint32)
+
+    mgr = kp.Manager()
+
+    tensor_in_a = mgr.tensor_t(arr_in_a)
+    tensor_in_b = mgr.tensor_t(arr_in_b)
+    tensor_out = mgr.tensor_t(arr_out)
+
+    params = [tensor_in_a, tensor_in_b, tensor_out]
+
+    (mgr.sequence()
+        .record(kp.OpTensorSyncDevice(params))
+        .record(kp.OpAlgoDispatch(mgr.algorithm(params, spirv)))
+        .record(kp.OpTensorSyncLocal([tensor_out]))
+        .eval())
+
+    print(f"Dtype value {tensor_out.data().dtype}")
+
+    assert np.all(tensor_out.data() == arr_in_a * arr_in_b)
+
+def test_type_short():
+
+    shader = """
+        #version 450
+        #extension GL_EXT_shader_explicit_arithmetic_types_int16 : require
+        layout(set = 0, binding = 0) buffer tensorLhs { int16_t valuesLhs[]; };
+        layout(set = 0, binding = 1) buffer tensorRhs { int16_t valuesRhs[]; };
+        layout(set = 0, binding = 2) buffer tensorOutput { int16_t valuesOutput[]; };
+        layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+        void main()
+        {
+            uint index = gl_GlobalInvocationID.x;
+            valuesOutput[index] = valuesLhs[index] * valuesRhs[index];
+        }
+    """
+
+    spirv = compile_source(shader)
+
+    arr_in_a = np.array([12, 15, 23], dtype=np.int16)
+    arr_in_b = np.array([948, 120, 123], dtype=np.int16)
+    arr_out = np.array([0, 0, 0], dtype=np.int16)
+
+    mgr = kp.Manager()
+
+    tensor_in_a = mgr.tensor_t(arr_in_a)
+    tensor_in_b = mgr.tensor_t(arr_in_b)
+    tensor_out = mgr.tensor_t(arr_out)
+
+    params = [tensor_in_a, tensor_in_b, tensor_out]
+
+    (mgr.sequence()
+        .record(kp.OpTensorSyncDevice(params))
+        .record(kp.OpAlgoDispatch(mgr.algorithm(params, spirv)))
+        .record(kp.OpTensorSyncLocal([tensor_out]))
+        .eval())
+
+    print(f"Dtype value {tensor_out.data().dtype}")
+
+    assert np.all(tensor_out.data() == arr_in_a * arr_in_b)
+
+def test_type_unsigned_short():
+
+    shader = """
+        #version 450
+        #extension GL_EXT_shader_explicit_arithmetic_types_int16 : require
+        layout(set = 0, binding = 0) buffer tensorLhs { uint16_t valuesLhs[]; };
+        layout(set = 0, binding = 1) buffer tensorRhs { uint16_t valuesRhs[]; };
+        layout(set = 0, binding = 2) buffer tensorOutput { uint16_t valuesOutput[]; };
+        layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+        void main()
+        {
+            uint index = gl_GlobalInvocationID.x;
+            valuesOutput[index] = valuesLhs[index] * valuesRhs[index];
+        }
+    """
+
+    spirv = compile_source(shader)
+
+    arr_in_a = np.array([12, 15, 23], dtype=np.uint16)
+    arr_in_b = np.array([948, 120, 123], dtype=np.uint16)
+    arr_out = np.array([0, 0, 0], dtype=np.uint16)
+
+    mgr = kp.Manager()
+
+    tensor_in_a = mgr.tensor_t(arr_in_a)
+    tensor_in_b = mgr.tensor_t(arr_in_b)
+    tensor_out = mgr.tensor_t(arr_out)
+
+    params = [tensor_in_a, tensor_in_b, tensor_out]
+
+    (mgr.sequence()
+        .record(kp.OpTensorSyncDevice(params))
+        .record(kp.OpAlgoDispatch(mgr.algorithm(params, spirv)))
+        .record(kp.OpTensorSyncLocal([tensor_out]))
+        .eval())
+
+    print(f"Dtype value {tensor_out.data().dtype}")
+
+    assert np.all(tensor_out.data() == arr_in_a * arr_in_b)
+
+def test_type_char():
+
+    shader = """
+        #version 450
+        #extension GL_EXT_shader_explicit_arithmetic_types_int8 : require
+        layout(set = 0, binding = 0) buffer tensorLhs { int8_t valuesLhs[]; };
+        layout(set = 0, binding = 1) buffer tensorRhs { int8_t valuesRhs[]; };
+        layout(set = 0, binding = 2) buffer tensorOutput { int8_t valuesOutput[]; };
+        layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+        void main()
+        {
+            uint index = gl_GlobalInvocationID.x;
+            valuesOutput[index] = valuesLhs[index] * valuesRhs[index];
+        }
+    """
+
+    spirv = compile_source(shader)
+
+    arr_in_a = np.array([2, 3, 2], dtype=np.int8)
+    arr_in_b = np.array([35, 12, 23], dtype=np.int8)
+    arr_out = np.array([0, 0, 0], dtype=np.int8)
+
+    mgr = kp.Manager()
+
+    tensor_in_a = mgr.tensor_t(arr_in_a)
+    tensor_in_b = mgr.tensor_t(arr_in_b)
+    tensor_out = mgr.tensor_t(arr_out)
+
+    params = [tensor_in_a, tensor_in_b, tensor_out]
+
+    (mgr.sequence()
+        .record(kp.OpTensorSyncDevice(params))
+        .record(kp.OpAlgoDispatch(mgr.algorithm(params, spirv)))
+        .record(kp.OpTensorSyncLocal([tensor_out]))
+        .eval())
+
+    print(f"Dtype value {tensor_out.data().dtype}")
+
+    assert np.all(tensor_out.data() == arr_in_a * arr_in_b)
+
+def test_type_unsigned_char():
+
+    shader = """
+        #version 450
+        #extension GL_EXT_shader_explicit_arithmetic_types_int8 : require
+        layout(set = 0, binding = 0) buffer tensorLhs { uint8_t valuesLhs[]; };
+        layout(set = 0, binding = 1) buffer tensorRhs { uint8_t valuesRhs[]; };
+        layout(set = 0, binding = 2) buffer tensorOutput { uint8_t valuesOutput[]; };
+        layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+        void main()
+        {
+            uint index = gl_GlobalInvocationID.x;
+            valuesOutput[index] = valuesLhs[index] * valuesRhs[index];
+        }
+    """
+
+    spirv = compile_source(shader)
+
+    arr_in_a = np.array([2, 3, 2], dtype=np.uint8)
+    arr_in_b = np.array([35, 12, 23], dtype=np.uint8)
+    arr_out = np.array([0, 0, 0], dtype=np.uint8)
 
     mgr = kp.Manager()
 
