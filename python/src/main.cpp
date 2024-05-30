@@ -157,10 +157,10 @@ PYBIND11_MODULE(kp, m)
                       "Kompute Python data type not supported");
             }
         },
-        DOC(kp, Tensor, data))
-      .def("size", &kp::Tensor::size, DOC(kp, Tensor, size))
-      .def("__len__", &kp::Tensor::size, DOC(kp, Tensor, size))
-      .def("memory_type", &kp::Memory::memoryType, DOC(kp, Memory, memoryType))
+        DOC(kp, Memory, data))
+      .def("size", &kp::Tensor::size, DOC(kp, Memory, size))
+      .def("__len__", &kp::Tensor::size, DOC(kp, Memory, size))
+      .def("memory_type", &kp::Tensor::memoryType, DOC(kp, Memory, memoryType))
       .def("data_type", &kp::Tensor::dataType, DOC(kp, Tensor, dataType))
       .def("is_init", &kp::Tensor::isInit, DOC(kp, Tensor, isInit))
       .def("destroy", &kp::Tensor::destroy, DOC(kp, Tensor, destroy));
