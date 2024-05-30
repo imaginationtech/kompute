@@ -102,6 +102,25 @@ PYBIND11_MODULE(kp, m)
       .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
            DOC(kp, OpTensorCopy, OpTensorCopy));
 
+    py::class_<kp::OpImageSyncDevice,
+               kp::OpBase,
+               std::shared_ptr<kp::OpImageSyncDevice>>(
+      m, "OpImageSyncDevice", DOC(kp, OpImageSyncDevice))
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
+           DOC(kp, OpImageSyncDevice, OpImageSyncDevice));
+
+    py::class_<kp::OpImageSyncLocal,
+               kp::OpBase,
+               std::shared_ptr<kp::OpImageSyncLocal>>(
+      m, "OpImageSyncLocal", DOC(kp, OpImageSyncLocal))
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
+           DOC(kp, OpImageSyncLocal, OpImageSyncLocal));
+
+    py::class_<kp::OpImageCopy, kp::OpBase, std::shared_ptr<kp::OpImageCopy>>(
+      m, "OpImageCopy", DOC(kp, OpImageCopy))
+      .def(py::init<const std::vector<std::shared_ptr<kp::Memory>>&>(),
+           DOC(kp, OpImageCopy, OpImageCopy));
+
     py::class_<kp::OpAlgoDispatch,
                kp::OpBase,
                std::shared_ptr<kp::OpAlgoDispatch>>(
@@ -167,6 +186,47 @@ PYBIND11_MODULE(kp, m)
       .def("data_type", &kp::Tensor::dataType, DOC(kp, Tensor, dataType))
       .def("is_init", &kp::Tensor::isInit, DOC(kp, Tensor, isInit))
       .def("destroy", &kp::Tensor::destroy, DOC(kp, Tensor, destroy));
+
+    py::class_<kp::Image, std::shared_ptr<kp::Image>, kp::Memory>(
+      m, "Image", DOC(kp, Image))
+      .def(
+        "data",
+        [](kp::Image& self) {
+            // Non-owning container exposing the underlying pointer
+            switch (self.dataType()) {
+                case kp::Image::ImageDataTypes::eF32:
+                    return py::array(
+                      self.size(), self.data<float>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eU32:
+                    return py::array(
+                      self.size(), self.data<uint32_t>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eS32:
+                    return py::array(
+                      self.size(), self.data<int32_t>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eU16:
+                    return py::array(
+                      self.size(), self.data<uint16_t>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eS16:
+                    return py::array(
+                      self.size(), self.data<int16_t>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eU8:
+                    return py::array(
+                      self.size(), self.data<uint8_t>(), py::cast(&self));
+                case kp::Image::ImageDataTypes::eS8:
+                    return py::array(
+                      self.size(), self.data<int8_t>(), py::cast(&self));
+                default:
+                    throw std::runtime_error(
+                      "Kompute Python data type not supported");
+            }
+        },
+        DOC(kp, Memory, data))
+      .def("size", &kp::Image::size, DOC(kp, Memory, size))
+      .def("__len__", &kp::Image::size, DOC(kp, Memory, size))
+      .def("memory_type", &kp::Image::memoryType, DOC(kp, Memory, memoryType))
+      .def("data_type", &kp::Image::dataType, DOC(kp, Image, dataType))
+      .def("is_init", &kp::Image::isInit, DOC(kp, Image, isInit))
+      .def("destroy", &kp::Image::destroy, DOC(kp, Image, destroy));
 
     py::class_<kp::Sequence, std::shared_ptr<kp::Sequence>>(m, "Sequence")
       .def(
@@ -300,6 +360,107 @@ PYBIND11_MODULE(kp, m)
         },
         DOC(kp, Manager, tensorT),
         py::arg("data"),
+        py::arg("memory_type") = kp::Memory::MemoryTypes::eDevice)
+      .def(
+        "image",
+        [np](kp::Manager& self,
+             const py::array_t<float>& data,
+             uint32_t width,
+             uint32_t height,
+             uint32_t num_channels,
+             kp::Memory::MemoryTypes memory_type) {
+            const py::array_t<float>& flatdata = np.attr("ravel")(data);
+            const py::buffer_info info = flatdata.request();
+            KP_LOG_DEBUG("Kompute Python Manager image() creating image "
+                         "float with data size {}",
+                         flatdata.size());
+            return self.image(info.ptr,
+                              width,
+                              height,
+                              num_channels,
+                              kp::Image::ImageDataTypes::eF32,
+                              memory_type);
+        },
+        DOC(kp, Manager, image),
+        py::arg("data"),
+        py::arg("width"),
+        py::arg("height"),
+        py::arg("num_channels"),
+        py::arg("memory_type") = kp::Memory::MemoryTypes::eDevice)
+      .def(
+        "image_t",
+        [np](kp::Manager& self,
+             const py::array& data,
+             uint32_t width,
+             uint32_t height,
+             uint32_t num_channels,
+             kp::Memory::MemoryTypes memory_type) {
+            // TODO: Suppport strides in numpy format
+            const py::array& flatdata = np.attr("ravel")(data);
+            const py::buffer_info info = flatdata.request();
+            KP_LOG_DEBUG("Kompute Python Manager creating image_T with data "
+                         "size {} dtype {}",
+                         flatdata.size(),
+                         std::string(py::str(flatdata.dtype())));
+            if (flatdata.dtype().is(py::dtype::of<std::float_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eF32,
+                                  memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::uint32_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eU32,
+                                  memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::int32_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eS32,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::uint16_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eU16,
+                                  memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::int16_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eS16,
+                                   memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::uint8_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eU8,
+                                  memory_type);
+            } else if (flatdata.dtype().is(py::dtype::of<std::int8_t>())) {
+                return self.image(info.ptr,
+                                  width,
+                                  height,
+                                  num_channels,
+                                  kp::Image::ImageDataTypes::eS8,
+                                   memory_type);
+            } else {
+                throw std::runtime_error(
+                  "Kompute Python no valid dtype supported");
+            }
+        },
+        DOC(kp, Manager, imageT),
+        py::arg("data"),
+        py::arg("width"),
+        py::arg("height"),
+        py::arg("num_channels"),
         py::arg("memory_type") = kp::Memory::MemoryTypes::eDevice)
       .def(
         "algorithm",
