@@ -130,7 +130,10 @@ PYBIND11_MODULE(kp, m)
       .def("destroy", &kp::Algorithm::destroy, DOC(kp, Algorithm, destroy))
       .def("is_init", &kp::Algorithm::isInit, DOC(kp, Algorithm, isInit));
 
-    py::class_<kp::Tensor, std::shared_ptr<kp::Tensor>>(
+    py::class_<kp::Memory, std::shared_ptr<kp::Memory>>(
+      m, "Memory", DOC(kp, Memory));
+
+    py::class_<kp::Tensor, std::shared_ptr<kp::Tensor>, kp::Memory>(
       m, "Tensor", DOC(kp, Tensor))
       .def(
         "data",
