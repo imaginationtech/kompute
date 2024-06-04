@@ -123,7 +123,7 @@ class Image : public Memory
       }
       else
       {
-        KP_LOG_ERROR("Kompute Image unsupported memory type");
+        throw std::runtime_error("Kompute Image unsupported memory type");
       }
 
       init(physicalDevice,
@@ -362,7 +362,7 @@ class ImageT : public Image
                      numChannels);
         if (data.size() == 0) {
             throw std::runtime_error(
-              "Kompute Tensor attempted to create a zero-sized image");
+              "Kompute ImageT attempted to create a zero-sized image");
         }
 
         if (data.size() < width * height * numChannels) {
@@ -395,7 +395,7 @@ class ImageT : public Image
                      numChannels);
         if (data.size() == 0) {
             throw std::runtime_error(
-              "Kompute Tensor attempted to create a zero-sized image");
+              "Kompute ImageT attempted to create a zero-sized image");
         }
 
         if (data.size() < width * height * numChannels) {
