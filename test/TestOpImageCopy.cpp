@@ -209,6 +209,22 @@ TEST(TestOpImageCopy, SingleImageShouldFail)
                  std::runtime_error);
 }
 
+TEST(TestOpImageCopy, TensorShouldFail)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecA{ 6, 7, 8 };
+
+    std::shared_ptr<kp::Memory> image =
+      mgr.image(testVecA, 3, 1, 1, kp::Memory::MemoryTypes::eHost);
+
+    std::shared_ptr<kp::Memory> tensor =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
+
+    EXPECT_THROW(mgr.sequence()->eval<kp::OpImageCopy>({ image, tensor }),
+                 std::runtime_error);
+}
+
 TEST(TestOpImageCopy, CopyThroughStorageImage)
 {
     kp::Manager mgr;

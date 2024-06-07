@@ -7,7 +7,6 @@
 
 TEST(TestOpImageSync, SyncToDeviceMemorySingleImage)
 {
-
     kp::Manager mgr;
 
     std::vector<float> testVecPreA{ 0, 0, 0 };
@@ -74,4 +73,19 @@ TEST(TestOpImageSync, NegativeUnrelatedImageSync)
 
     // Making sure the GPU holds the same vector
     EXPECT_NE(ImageIn->vector(), ImageOut->vector());
+}
+
+TEST(TestOpImageSync, TensorShouldFail)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecPreA{ 0, 0, 0 };
+
+    std::shared_ptr<kp::TensorT<float>> tensor = mgr.tensor(testVecPreA);
+
+    EXPECT_THROW(mgr.sequence()->eval<kp::OpImageSyncDevice>({ tensor }),
+                 std::runtime_error);
+
+    EXPECT_THROW(mgr.sequence()->eval<kp::OpImageSyncLocal>({ tensor }),
+                 std::runtime_error);
 }

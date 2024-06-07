@@ -53,3 +53,18 @@ TEST(TestOpTensorSync, SyncToDeviceMemoryMultiTensor)
     EXPECT_EQ(tensorB->vector(), testVec);
     EXPECT_EQ(tensorC->vector(), testVec);
 }
+
+TEST(TestOpTensorSync, ImageShouldFail)
+{
+    kp::Manager mgr;
+
+    std::vector<float> testVecPreA{ 0, 0, 0 };
+
+    std::shared_ptr<kp::ImageT<float>> image = mgr.image(testVecPreA, 3, 1, 1);
+
+    EXPECT_THROW(mgr.sequence()->eval<kp::OpTensorSyncDevice>({ image }),
+                 std::runtime_error);
+
+    EXPECT_THROW(mgr.sequence()->eval<kp::OpTensorSyncLocal>({ image }),
+                 std::runtime_error);
+}

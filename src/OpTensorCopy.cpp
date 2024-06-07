@@ -9,13 +9,17 @@ OpTensorCopy::OpTensorCopy(const std::vector<std::shared_ptr<Memory>>& tensors)
 {
     KP_LOG_DEBUG("Kompute OpTensorCopy constructor with params");
 
-    for (std::shared_ptr<Memory> tensor : tensors) {
-        this->mTensors.push_back(std::dynamic_pointer_cast<Tensor>(tensor));
+    if (tensors.size() < 2) {
+        throw std::runtime_error(
+          "Kompute OpTensorCopy called with less than 2 tensors");
     }
 
-    if (this->mTensors.size() < 2) {
-        throw std::runtime_error(
-          "Kompute OpTensorCopy called with less than 2 tensor");
+    for (std::shared_ptr<Memory> tensor : tensors) {
+        if (std::dynamic_pointer_cast<Tensor>(tensor) == nullptr)
+        {
+            throw std::runtime_error("Kompute OpTensorCopy: Memory object is not a Tensor");
+        }
+        this->mTensors.push_back(std::dynamic_pointer_cast<Tensor>(tensor));
     }
 
     kp::Tensor::TensorDataTypes dataType = this->mTensors[0]->dataType();
