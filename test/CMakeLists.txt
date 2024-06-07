@@ -18,6 +18,7 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestOpShadersFromStringAndFile.cpp
     TestOpTensorCopy.cpp
     TestOpTensorCreate.cpp
+    TestOpTensorSync.cpp
     TestPushConstant.cpp
     TestSequence.cpp
     TestSpecializationConstant.cpp

@@ -14,7 +14,13 @@ OpTensorSyncDevice::OpTensorSyncDevice(
           "Kompute OpTensorSyncDevice called with less than 1 tensor");
     }
 
-    this->mTensors = tensors;
+    for (std::shared_ptr<Memory> tensor : tensors) {
+        if (std::dynamic_pointer_cast<Tensor>(tensor) == nullptr)
+        {
+            throw std::runtime_error("Kompute OpTensorCopy: Memory object is not a Tensor");
+        }
+        this->mTensors.push_back(std::dynamic_pointer_cast<Tensor>(tensor));
+    }
 }
 
 OpTensorSyncDevice::~OpTensorSyncDevice()

@@ -15,6 +15,10 @@ OpImageCopy::OpImageCopy(const std::vector<std::shared_ptr<Memory>>& images)
     }
 
     for (std::shared_ptr<Memory> image : images) {
+        if (std::dynamic_pointer_cast<Image>(image) == nullptr)
+        {
+            throw std::runtime_error("Kompute OpImageCopy: Memory object is not an Image");
+        }
         this->mImages.push_back(std::dynamic_pointer_cast<Image>(image));
     }
 
