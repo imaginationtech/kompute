@@ -446,6 +446,24 @@ Manager::createDevice(const std::vector<uint32_t>& familyQueueIndices,
                                           validExtensions.size(),
                                           validExtensions.data());
 
+    std::string khr_16bit_storage = "VK_KHR_16bit_storage";
+
+    vk::PhysicalDevice16BitStorageFeatures storage16BitFeatures = {};
+    vk::PhysicalDeviceFeatures2 deviceFeatures2 = {};
+
+    if (std::find(validExtensions.begin(), validExtensions.end(), khr_16bit_storage) != validExtensions.end()) {
+        storage16BitFeatures.sType = vk::StructureType::ePhysicalDevice16BitStorageFeatures;
+        storage16BitFeatures.pNext = nullptr;
+
+        deviceFeatures2.sType = vk::StructureType::ePhysicalDeviceFeatures2;
+        deviceFeatures2.pNext = &storage16BitFeatures;
+
+        // Query the device features and extensions
+        physicalDevice.getFeatures2(&deviceFeatures2);
+
+        deviceCreateInfo.pNext = &deviceFeatures2;
+    }
+
     this->mDevice = std::make_shared<vk::Device>();
     physicalDevice.createDevice(
       &deviceCreateInfo, nullptr, this->mDevice.get());
