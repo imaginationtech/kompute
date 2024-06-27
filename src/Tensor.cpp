@@ -36,9 +36,9 @@ Tensor::Tensor(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
                  elementTotalCount,
                  Memory::toString(memoryType));
 
-    if (memoryType == MemoryTypes::eStorage && data != nullptr)
-    {
-        KP_LOG_WARN("Kompute Tensor of type eStorage do not need to be initialised with data");
+    if (memoryType == MemoryTypes::eStorage && data != nullptr) {
+        KP_LOG_WARN("Kompute Tensor of type eStorage do not need to be "
+                    "initialised with data");
     }
 
     this->mPhysicalDevice = physicalDevice;
@@ -129,17 +129,19 @@ Tensor::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
     vk::Offset3D offset = { 0, 0, 0 };
 
     // FIXME: Check the size of the dest and source images match
-    vk::Extent3D size = { copyFromImage->getWidth(), copyFromImage->getHeight(), 1 };
+    vk::Extent3D size = { copyFromImage->getWidth(),
+                          copyFromImage->getHeight(),
+                          1 };
 
     vk::BufferImageCopy copyRegion(0, 0, 0, layer, offset, size);
 
     KP_LOG_DEBUG("Kompute Tensor recordCopyFrom data size {}.", bufferSize);
 
     this->recordCopyBufferFromImage(commandBuffer,
-                           copyFromImage->getPrimaryImage(),
-                           this->mPrimaryBuffer,
-                           bufferSize,
-                           copyRegion);
+                                    copyFromImage->getPrimaryImage(),
+                                    this->mPrimaryBuffer,
+                                    bufferSize,
+                                    copyRegion);
 }
 
 void
@@ -185,12 +187,13 @@ Tensor::recordCopyBuffer(const vk::CommandBuffer& commandBuffer,
 
 void
 Tensor::recordCopyBufferFromImage(const vk::CommandBuffer& commandBuffer,
-                         std::shared_ptr<vk::Image> imageFrom,
-                         std::shared_ptr<vk::Buffer> bufferTo,
-                         vk::DeviceSize /*bufferSize*/,
-                         vk::BufferImageCopy copyRegion)
+                                  std::shared_ptr<vk::Image> imageFrom,
+                                  std::shared_ptr<vk::Buffer> bufferTo,
+                                  vk::DeviceSize /*bufferSize*/,
+                                  vk::BufferImageCopy copyRegion)
 {
-    commandBuffer.copyImageToBuffer(*imageFrom, vk::ImageLayout::eGeneral, *bufferTo, 1, &copyRegion);
+    commandBuffer.copyImageToBuffer(
+      *imageFrom, vk::ImageLayout::eGeneral, *bufferTo, 1, &copyRegion);
 }
 
 void
@@ -357,7 +360,8 @@ Tensor::getStagingMemoryPropertyFlags()
     }
 }
 
-std::shared_ptr<vk::Buffer> Tensor::getPrimaryBuffer()
+std::shared_ptr<vk::Buffer>
+Tensor::getPrimaryBuffer()
 {
     return this->mPrimaryBuffer;
 }

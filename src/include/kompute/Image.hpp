@@ -58,7 +58,18 @@ class Image : public Memory
           uint32_t numChannels,
           const ImageDataTypes& dataType,
           vk::ImageTiling tiling,
-          const MemoryTypes& memoryType = MemoryTypes::eDevice) { init(physicalDevice, device, data, width, height, numChannels, dataType, tiling, memoryType); }
+          const MemoryTypes& memoryType = MemoryTypes::eDevice)
+    {
+        init(physicalDevice,
+             device,
+             data,
+             width,
+             height,
+             numChannels,
+             dataType,
+             tiling,
+             memoryType);
+    }
 
     /**
      *  Constructor with no data provided.
@@ -87,7 +98,9 @@ class Image : public Memory
               numChannels,
               dataType,
               tiling,
-              memoryType){}
+              memoryType)
+    {
+    }
 
     /**
      *  Constructor with data provided which would be used to create the
@@ -113,31 +126,28 @@ class Image : public Memory
           const ImageDataTypes& dataType,
           const MemoryTypes& memoryType = MemoryTypes::eDevice)
     {
-      vk::ImageTiling tiling;
+        vk::ImageTiling tiling;
 
-      if (memoryType == MemoryTypes::eHost || memoryType == MemoryTypes::eDeviceAndHost)
-      {
-        // Host-accessible memory must be linear-tiled.
-        tiling = vk::ImageTiling::eLinear;
-      }
-      else if(memoryType == MemoryTypes::eDevice || memoryType == MemoryTypes::eStorage)
-      {
-        tiling = vk::ImageTiling::eOptimal;
-      }
-      else
-      {
-        throw std::runtime_error("Kompute Image unsupported memory type");
-      }
+        if (memoryType == MemoryTypes::eHost ||
+            memoryType == MemoryTypes::eDeviceAndHost) {
+            // Host-accessible memory must be linear-tiled.
+            tiling = vk::ImageTiling::eLinear;
+        } else if (memoryType == MemoryTypes::eDevice ||
+                   memoryType == MemoryTypes::eStorage) {
+            tiling = vk::ImageTiling::eOptimal;
+        } else {
+            throw std::runtime_error("Kompute Image unsupported memory type");
+        }
 
-      init(physicalDevice,
-              device,
-              data,
-              width,
-              height,
-              numChannels,
-              dataType,
-              tiling,
-              memoryType);
+        init(physicalDevice,
+             device,
+             data,
+             width,
+             height,
+             numChannels,
+             dataType,
+             tiling,
+             memoryType);
     }
 
     /**
@@ -165,7 +175,9 @@ class Image : public Memory
               height,
               numChannels,
               dataType,
-              memoryType){}  
+              memoryType)
+    {
+    }
 
     /**
      * Destructor which is in charge of freeing vulkan resources unless they
@@ -321,9 +333,9 @@ class Image : public Memory
                          std::shared_ptr<vk::Image> imageTo,
                          vk::ImageCopy copyRegion);
     void recordCopyImageFromTensor(const vk::CommandBuffer& commandBuffer,
-                       std::shared_ptr<vk::Buffer> bufferFrom,
-                       std::shared_ptr<vk::Image> imageTo,
-                       vk::BufferImageCopy copyRegion);
+                                   std::shared_ptr<vk::Buffer> bufferFrom,
+                                   std::shared_ptr<vk::Image> imageTo,
+                                   vk::BufferImageCopy copyRegion);
     void recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                   const vk::Image& image,
                                   vk::AccessFlagBits srcAccessMask,
@@ -345,14 +357,14 @@ class Image : public Memory
     vk::DescriptorImageInfo constructDescriptorImageInfo();
 
     void init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-          std::shared_ptr<vk::Device> device,
-          void* data,
-          uint32_t width,
-          uint32_t height,
-          uint32_t numChannels,
-          const ImageDataTypes& dataType,
-          vk::ImageTiling tiling,
-          const MemoryTypes& memoryType = MemoryTypes::eDevice);
+              std::shared_ptr<vk::Device> device,
+              void* data,
+              uint32_t width,
+              uint32_t height,
+              uint32_t numChannels,
+              const ImageDataTypes& dataType,
+              vk::ImageTiling tiling,
+              const MemoryTypes& memoryType = MemoryTypes::eDevice);
 };
 
 template<typename T>
@@ -366,7 +378,7 @@ class ImageT : public Image
            uint32_t width,
            uint32_t height,
            uint32_t numChannels,
-            vk::ImageTiling tiling,
+           vk::ImageTiling tiling,
            const MemoryTypes& imageType = MemoryTypes::eDevice)
       : Image(physicalDevice,
               device,
@@ -474,10 +486,7 @@ class ImageT : public Image
 
     ~ImageT() { KP_LOG_DEBUG("Kompute imageT destructor"); }
 
-    std::vector<T> vector()
-    {
-        return Memory::vector<T>();
-    }
+    std::vector<T> vector() { return Memory::vector<T>(); }
 
     T& operator[](int index) { return *(Memory::data<T>() + index); }
 

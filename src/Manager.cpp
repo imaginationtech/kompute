@@ -451,8 +451,11 @@ Manager::createDevice(const std::vector<uint32_t>& familyQueueIndices,
     vk::PhysicalDevice16BitStorageFeatures storage16BitFeatures = {};
     vk::PhysicalDeviceFeatures2 deviceFeatures2 = {};
 
-    if (std::find(validExtensions.begin(), validExtensions.end(), khr_16bit_storage) != validExtensions.end()) {
-        storage16BitFeatures.sType = vk::StructureType::ePhysicalDevice16BitStorageFeatures;
+    if (std::find(validExtensions.begin(),
+                  validExtensions.end(),
+                  khr_16bit_storage) != validExtensions.end()) {
+        storage16BitFeatures.sType =
+          vk::StructureType::ePhysicalDevice16BitStorageFeatures;
         storage16BitFeatures.uniformAndStorageBuffer16BitAccess = true;
         storage16BitFeatures.storageBuffer16BitAccess = true;
         storage16BitFeatures.pNext = nullptr;

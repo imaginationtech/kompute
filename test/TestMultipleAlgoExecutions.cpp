@@ -95,12 +95,13 @@ TEST(TestMultipleAlgoExecutions, SingleSequenceRecord)
     {
         // A sharedMemoryBarrier is required as the shader is not thread-safe
         std::shared_ptr<kp::OpMemoryBarrier> shaderBarrier{
-            new kp::OpMemoryBarrier({ tensorA },
-                                    // FIXME: eTransferRead is not supported for the compute pipeline
-                                    vk::AccessFlagBits::eTransferRead,
-                                    vk::AccessFlagBits::eShaderWrite,
-                                    vk::PipelineStageFlagBits::eComputeShader,
-                                    vk::PipelineStageFlagBits::eComputeShader)
+            new kp::OpMemoryBarrier(
+              { tensorA },
+              // FIXME: eTransferRead is not supported for the compute pipeline
+              vk::AccessFlagBits::eTransferRead,
+              vk::AccessFlagBits::eShaderWrite,
+              vk::PipelineStageFlagBits::eComputeShader,
+              vk::PipelineStageFlagBits::eComputeShader)
         };
 
         mgr.sequence()

@@ -19,11 +19,13 @@ TEST(TestImage, ConstructorNoData)
 {
     kp::Manager mgr;
 
-    std::shared_ptr<kp::Image> image = mgr.image(nullptr, 3, 3, 1, kp::Image::ImageDataTypes::eF32);
+    std::shared_ptr<kp::Image> image =
+      mgr.image(nullptr, 3, 3, 1, kp::Image::ImageDataTypes::eF32);
     EXPECT_EQ(image->size(), 9);
     EXPECT_EQ(image->dataTypeMemorySize(), sizeof(float));
 
-    std::shared_ptr<kp::Image> image2 = mgr.image(3, 3, 1, kp::Image::ImageDataTypes::eF32);
+    std::shared_ptr<kp::Image> image2 =
+      mgr.image(3, 3, 1, kp::Image::ImageDataTypes::eF32);
     EXPECT_EQ(image2->size(), 9);
     EXPECT_EQ(image2->dataTypeMemorySize(), sizeof(float));
 

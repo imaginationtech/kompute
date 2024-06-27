@@ -18,11 +18,13 @@ TEST(TestTensor, ConstructorData)
 TEST(TestTensor, ConstructorNoData)
 {
     kp::Manager mgr;
-    std::shared_ptr<kp::Tensor> tensor = mgr.tensor(nullptr, 3, sizeof(float), kp::Tensor::TensorDataTypes::eFloat);
+    std::shared_ptr<kp::Tensor> tensor = mgr.tensor(
+      nullptr, 3, sizeof(float), kp::Tensor::TensorDataTypes::eFloat);
     EXPECT_EQ(tensor->size(), 3);
     EXPECT_EQ(tensor->dataTypeMemorySize(), sizeof(float));
 
-    std::shared_ptr<kp::Tensor> tensor2 = mgr.tensor(3, sizeof(float), kp::Tensor::TensorDataTypes::eFloat);
+    std::shared_ptr<kp::Tensor> tensor2 =
+      mgr.tensor(3, sizeof(float), kp::Tensor::TensorDataTypes::eFloat);
     EXPECT_EQ(tensor2->size(), 3);
     EXPECT_EQ(tensor2->dataTypeMemorySize(), sizeof(float));
 

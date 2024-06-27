@@ -150,8 +150,10 @@ TEST(TestOpTensorCopy, CopyDeviceAndHostToDeviceAndHostTensor)
     std::vector<float> testVecA{ 1, 2, 3 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA, kp::Memory::MemoryTypes::eDeviceAndHost);
-    std::shared_ptr<kp::Memory> tensorB = mgr.tensor(testVecB, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> tensorA =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> tensorB =
+      mgr.tensor(testVecB, kp::Memory::MemoryTypes::eDeviceAndHost);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(tensorB->isInit());
@@ -312,7 +314,8 @@ TEST(TestOpTensorCopy, CopyTensorThroughStorageViaAlgorithmsUninitialisedOutput)
     std::vector<float> testVecIn{ 9, 1, 3 };
 
     std::shared_ptr<kp::Memory> tensorIn = mgr.tensor(testVecIn);
-    std::shared_ptr<kp::Memory> tensorOut = mgr.tensorT<float>(testVecIn.size());
+    std::shared_ptr<kp::Memory> tensorOut =
+      mgr.tensorT<float>(testVecIn.size());
     // Tensor storage requires a vector to be passed only to reflect size
     std::shared_ptr<kp::Memory> tensorStorage =
       mgr.tensorT<float>(testVecIn.size(), kp::Memory::MemoryTypes::eStorage);
