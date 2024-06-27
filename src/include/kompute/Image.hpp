@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Memory.hpp"
+#include "Tensor.hpp"
 #include "kompute/Core.hpp"
 #include "logger/Logger.hpp"
 #include <memory>
@@ -32,6 +33,8 @@ class Image : public Memory
     };
 
     static std::string toString(ImageDataTypes dt);
+
+    static Tensor::TensorDataTypes getTensorDataType(ImageDataTypes dt);
 
     /**
      *  Constructor with data provided which would be used to create the
@@ -202,6 +205,17 @@ class Image : public Memory
                         std::shared_ptr<Image> copyFromImage);
 
     /**
+     * Records a copy from the memory of the tensor provided to the current
+     * image. This is intended to pass memory into a processing, to perform
+     * a staging image transfer, or to gather output (between others).
+     *
+     * @param commandBuffer Vulkan Command Buffer to record the commands into
+     * @param copyFromTensor Tensor to copy the data from
+     */
+    void recordCopyFrom(const vk::CommandBuffer& commandBuffer,
+                        std::shared_ptr<Tensor> copyFromTensor);
+
+    /**
      * Records a copy from the internal staging memory to the device memory
      * using an optional barrier to wait for the operation. This function would
      * only be relevant for kp::images of type eDevice.
@@ -270,6 +284,12 @@ class Image : public Memory
      */
     ImageDataTypes dataType();
 
+    std::shared_ptr<vk::Image> getPrimaryImage();
+
+    uint32_t getWidth();
+    uint32_t getHeight();
+    uint32_t getNumChannels();
+
   protected:
     // -------------- ALWAYS OWNED RESOURCES
     ImageDataTypes mDataType;
@@ -300,6 +320,10 @@ class Image : public Memory
                          std::shared_ptr<vk::Image> imageFrom,
                          std::shared_ptr<vk::Image> imageTo,
                          vk::ImageCopy copyRegion);
+    void recordCopyImageFromTensor(const vk::CommandBuffer& commandBuffer,
+                       std::shared_ptr<vk::Buffer> bufferFrom,
+                       std::shared_ptr<vk::Image> imageTo,
+                       vk::BufferImageCopy copyRegion);
     void recordImageMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                   const vk::Image& image,
                                   vk::AccessFlagBits srcAccessMask,

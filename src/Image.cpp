@@ -29,6 +29,31 @@ Image::toString(Image::ImageDataTypes dt)
     }
 }
 
+Tensor::TensorDataTypes
+Image::getTensorDataType(Image::ImageDataTypes dt)
+{
+    switch (dt) {
+        case ImageDataTypes::eU8:
+            return Tensor::TensorDataTypes::eUnsignedChar;
+        case ImageDataTypes::eS8:
+            return Tensor::TensorDataTypes::eChar;
+        case ImageDataTypes::eU16:
+            return Tensor::TensorDataTypes::eUnsignedShort;
+        case ImageDataTypes::eS16:
+            return Tensor::TensorDataTypes::eShort;
+        case ImageDataTypes::eU32:
+            return Tensor::TensorDataTypes::eUnsignedInt;
+        case ImageDataTypes::eS32:
+            return Tensor::TensorDataTypes::eInt;
+        case ImageDataTypes::eF16:
+            return Tensor::TensorDataTypes::eHalfFloat;
+        case ImageDataTypes::eF32:
+            return Tensor::TensorDataTypes::eFloat;
+        default:
+            return Tensor::TensorDataTypes::eCustom;
+    }
+}
+
 void Image::init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
              std::shared_ptr<vk::Device> device,
              void* data,
@@ -163,6 +188,29 @@ Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
 }
 
 void
+Image::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
+                      std::shared_ptr<Tensor> copyFromTensor)
+{
+    vk::ImageSubresourceLayers layer = {};
+    layer.aspectMask = vk::ImageAspectFlagBits::eColor;
+    layer.layerCount = 1;
+    vk::Offset3D offset = { 0, 0, 0 };
+
+    // FIXME: Check the size of the dest and source images match
+    vk::Extent3D size = { this->mWidth, this->mHeight, 1 };
+
+    vk::BufferImageCopy copyRegion(0, 0, 0, layer, offset, size);
+
+    KP_LOG_DEBUG(
+      "Kompute Image recordCopyFrom size {},{}.", size.width, size.height);
+
+    this->recordCopyImageFromTensor(commandBuffer,
+                                    copyFromTensor->getPrimaryBuffer(),
+                                    this->mPrimaryImage,
+                                    copyRegion);
+}
+
+void
 Image::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 {
     vk::ImageSubresourceLayers layer = {};
@@ -240,6 +288,19 @@ Image::recordCopyImage(const vk::CommandBuffer& commandBuffer,
 {
     commandBuffer.copyImage(*imageFrom,
                             vk::ImageLayout::eGeneral,
+                            *imageTo,
+                            vk::ImageLayout::eGeneral,
+                            1,
+                            &copyRegion);
+}
+
+void
+Image::recordCopyImageFromTensor(const vk::CommandBuffer& commandBuffer,
+                       std::shared_ptr<vk::Buffer> bufferFrom,
+                       std::shared_ptr<vk::Image> imageTo,
+                       vk::BufferImageCopy copyRegion)
+{
+    commandBuffer.copyBufferToImage(*bufferFrom,
                             *imageTo,
                             vk::ImageLayout::eGeneral,
                             1,
@@ -449,6 +510,30 @@ Image::getStagingMemoryPropertyFlags()
         default:
             throw std::runtime_error("Kompute Image invalid image type");
     }
+}
+
+std::shared_ptr<vk::Image>
+Image::getPrimaryImage()
+{
+    return this->mPrimaryImage;
+}
+
+uint32_t
+Image::getWidth()
+{
+    return this->mWidth;
+}
+
+uint32_t
+Image::getHeight()
+{
+    return this->mHeight;
+}
+
+uint32_t
+Image::getNumChannels()
+{
+    return this->mNumChannels;
 }
 
 void

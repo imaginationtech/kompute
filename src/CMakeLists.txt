@@ -13,6 +13,7 @@ add_library(kompute Algorithm.cpp
     OpAlgoDispatch.cpp
     OpMemoryBarrier.cpp
     OpTensorCopy.cpp
+    OpTensorCopyToImage.cpp
     OpTensorSyncDevice.cpp
     OpTensorSyncLocal.cpp
     Sequence.cpp
@@ -21,6 +22,7 @@ add_library(kompute Algorithm.cpp
     Image.cpp
     Memory.cpp
     OpImageCopy.cpp
+    OpImageCopyToTensor.cpp
     OpImageSyncDevice.cpp
     OpImageSyncLocal.cpp)
 

@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include "Memory.hpp"
+#include "kompute/Memory.hpp"
 #include "kompute/Core.hpp"
 #include "logger/Logger.hpp"
 #include <memory>
 #include <string>
 
 namespace kp {
+
+// Forward-declare the Image class
+class Image;
 
 /**
  * Structured data used in GPU operations.
@@ -31,7 +34,8 @@ class Tensor : public Memory
         eChar = 6,
         eUnsignedChar = 7,
         eShort = 8,
-        eUnsignedShort = 9
+        eUnsignedShort = 9,
+        eHalfFloat = 10
     };
 
     static std::string toString(TensorDataTypes dt);
@@ -117,6 +121,17 @@ class Tensor : public Memory
                         std::shared_ptr<Tensor> copyFromTensor);
 
     /**
+     * Records a copy from the memory of the image provided to the current
+     * tensor. This is intended to pass memory into a processing, to perform
+     * a staging buffer transfer, or to gather output (between others).
+     *
+     * @param commandBuffer Vulkan Command Buffer to record the commands into
+     * @param copyFromImage Image to copy the data from
+     */
+    void recordCopyFrom(const vk::CommandBuffer& commandBuffer,
+                          std::shared_ptr<Image> copyFromImage);
+
+    /**
      * Records a copy from the internal staging memory to the device memory
      * using an optional barrier to wait for the operation. This function would
      * only be relevant for kp::Tensors of type eDevice.
@@ -185,6 +200,8 @@ class Tensor : public Memory
      */
     TensorDataTypes dataType();
 
+    std::shared_ptr<vk::Buffer> getPrimaryBuffer();
+
   protected:
     // -------------- ALWAYS OWNED RESOURCES
     TensorDataTypes mDataType;
@@ -208,6 +225,11 @@ class Tensor : public Memory
                           std::shared_ptr<vk::Buffer> bufferTo,
                           vk::DeviceSize bufferSize,
                           vk::BufferCopy copyRegion);
+    void recordCopyBufferFromImage(const vk::CommandBuffer& commandBuffer,
+                         std::shared_ptr<vk::Image> imageFrom,
+                         std::shared_ptr<vk::Buffer> bufferTo,
+                         vk::DeviceSize /*bufferSize*/,
+                         vk::BufferImageCopy copyRegion);
     void recordBufferMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                    const vk::Buffer& buffer,
                                    vk::AccessFlagBits srcAccessMask,
