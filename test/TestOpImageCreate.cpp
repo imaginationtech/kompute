@@ -66,19 +66,31 @@ TEST(TestOpImageCreate, ExceptionOnInvalidTiledImage)
 
     try {
         std::shared_ptr<kp::ImageT<float>> imageA =
-          mgr.image(testVecA, 1, 1, 1, vk::ImageTiling::eOptimal, kp::Memory::MemoryTypes::eDeviceAndHost);
+          mgr.image(testVecA,
+                    1,
+                    1,
+                    1,
+                    vk::ImageTiling::eOptimal,
+                    kp::Memory::MemoryTypes::eDeviceAndHost);
     } catch (const std::runtime_error& err) {
         // check exception
-        ASSERT_TRUE(std::string(err.what()).find("optimal tiling is only supported for") !=
+        ASSERT_TRUE(std::string(err.what())
+                      .find("optimal tiling is only supported for") !=
                     std::string::npos);
     }
 
     try {
         std::shared_ptr<kp::ImageT<float>> imageA =
-          mgr.image(testVecA, 1, 1, 1, vk::ImageTiling::eOptimal, kp::Memory::MemoryTypes::eHost);
+          mgr.image(testVecA,
+                    1,
+                    1,
+                    1,
+                    vk::ImageTiling::eOptimal,
+                    kp::Memory::MemoryTypes::eHost);
     } catch (const std::runtime_error& err) {
         // check exception
-        ASSERT_TRUE(std::string(err.what()).find("optimal tiling is only supported for") !=
+        ASSERT_TRUE(std::string(err.what())
+                      .find("optimal tiling is only supported for") !=
                     std::string::npos);
     }
 }

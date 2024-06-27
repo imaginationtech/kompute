@@ -24,7 +24,8 @@ class OpImageCopyToTensor : public OpBase
      *
      * @param images Images that will be used to create in operation.
      */
-    OpImageCopyToTensor(const std::vector<std::shared_ptr<Memory>>& mem_objects);
+    OpImageCopyToTensor(
+      const std::vector<std::shared_ptr<Memory>>& mem_objects);
 
     /**
      * Default destructor. This class does not manage memory so it won't be

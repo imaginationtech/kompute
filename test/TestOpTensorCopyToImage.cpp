@@ -16,17 +16,18 @@ TEST(TestOpTensorCopyToImage, CopyDeviceToDeviceTensor)
     std::vector<float> testVecB{ 0, 0, 0 };
 
     std::shared_ptr<kp::Memory> tensor = mgr.tensor(testVecA);
-    std::shared_ptr<kp::Memory> image = mgr.image(testVecB, testVecB.size(), 1, 1);
+    std::shared_ptr<kp::Memory> image =
+      mgr.image(testVecB, testVecB.size(), 1, 1);
 
     EXPECT_TRUE(tensor->isInit());
     EXPECT_TRUE(image->isInit());
 
     mgr.sequence()
-      ->eval<kp::OpTensorSyncDevice>({tensor})
-      ->eval<kp::OpImageSyncDevice>({image})
+      ->eval<kp::OpTensorSyncDevice>({ tensor })
+      ->eval<kp::OpImageSyncDevice>({ image })
       ->eval<kp::OpTensorCopyToImage>({ tensor, image })
-      ->eval<kp::OpTensorSyncLocal>({tensor})
-      ->eval<kp::OpImageSyncLocal>({image});
+      ->eval<kp::OpTensorSyncLocal>({ tensor })
+      ->eval<kp::OpImageSyncLocal>({ image });
 
     // Making sure the GPU holds the same vector
     EXPECT_EQ(tensor->vector(), image->vector());
@@ -42,8 +43,10 @@ TEST(TestOpTensorCopyToImage, CopyDeviceToDeviceTensorMulti)
     std::vector<float> testVecC{ 0, 0, 0 };
 
     std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, testVecB.size(), 1, 1);
-    std::shared_ptr<kp::Memory> imageC = mgr.image(testVecC, testVecC.size(), 1, 1);
+    std::shared_ptr<kp::Memory> imageB =
+      mgr.image(testVecB, testVecB.size(), 1, 1);
+    std::shared_ptr<kp::Memory> imageC =
+      mgr.image(testVecC, testVecC.size(), 1, 1);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(imageB->isInit());
@@ -73,8 +76,8 @@ TEST(TestOpTensorCopyToImage, CopyDeviceToHostTensor)
     std::vector<float> testVecB{ 0, 0, 0 };
 
     std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::Memory> imageB =
-      mgr.image(testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(
+      testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
 
     //  Only calling sync on device type tensor
     mgr.sequence()->eval<kp::OpTensorSyncDevice>({ tensorA });
@@ -101,7 +104,8 @@ TEST(TestOpTensorCopyToImage, CopyHostToDeviceTensor)
 
     std::shared_ptr<kp::Memory> tensorA =
       mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
-    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, testVecB.size(), 1, 1);
+    std::shared_ptr<kp::Memory> imageB =
+      mgr.image(testVecB, testVecB.size(), 1, 1);
 
     //  Only calling sync on device type tensor
     mgr.sequence()->eval<kp::OpTensorSyncDevice>({ tensorA });
@@ -129,8 +133,8 @@ TEST(TestOpTensorCopyToImage, CopyHostToHostTensor)
 
     std::shared_ptr<kp::Memory> tensorA =
       mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
-    std::shared_ptr<kp::Memory> imageB =
-      mgr.image(testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(
+      testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(imageB->isInit());
@@ -154,8 +158,10 @@ TEST(TestOpTensorCopyToImage, CopyDeviceAndHostToDeviceAndHostTensor)
     std::vector<float> testVecA{ 1, 2, 3 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA, kp::Memory::MemoryTypes::eDeviceAndHost);
-    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> tensorA =
+      mgr.tensor(testVecA, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(
+      testVecB, testVecB.size(), 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(imageB->isInit());
@@ -199,8 +205,9 @@ TEST(TestOpTensorCopyToImage, TensorsShouldFail)
     std::shared_ptr<kp::Memory> tensorB =
       mgr.tensor(testVecA, kp::Memory::MemoryTypes::eHost);
 
-    EXPECT_THROW(mgr.sequence()->eval<kp::OpTensorCopyToImage>({ tensorA, tensorB }),
-                 std::runtime_error);
+    EXPECT_THROW(
+      mgr.sequence()->eval<kp::OpTensorCopyToImage>({ tensorA, tensorB }),
+      std::runtime_error);
 }
 
 TEST(TestOpTensorCopyToImage, ImagesShouldFail)
@@ -209,14 +216,15 @@ TEST(TestOpTensorCopyToImage, ImagesShouldFail)
 
     std::vector<float> testVecA{ 6, 7, 8 };
 
-    std::shared_ptr<kp::Memory> imageA =
-      mgr.image(testVecA, testVecA.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> imageA = mgr.image(
+      testVecA, testVecA.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
 
-    std::shared_ptr<kp::Memory> imageB =
-      mgr.image(testVecA, testVecA.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
+    std::shared_ptr<kp::Memory> imageB = mgr.image(
+      testVecA, testVecA.size(), 1, 1, kp::Memory::MemoryTypes::eHost);
 
-    EXPECT_THROW(mgr.sequence()->eval<kp::OpTensorCopyToImage>({ imageA, imageB }),
-                 std::runtime_error);
+    EXPECT_THROW(
+      mgr.sequence()->eval<kp::OpTensorCopyToImage>({ imageA, imageB }),
+      std::runtime_error);
 }
 
 TEST(TestOpTensorCopyToImage, CopyThroughStorageTensor)
@@ -227,7 +235,8 @@ TEST(TestOpTensorCopyToImage, CopyThroughStorageTensor)
     std::vector<float> testVecOut{ 0, 0, 0 };
 
     std::shared_ptr<kp::Memory> tensorIn = mgr.tensor(testVecIn);
-    std::shared_ptr<kp::Memory> imageOut = mgr.image(testVecOut, testVecOut.size(), 1, 1);
+    std::shared_ptr<kp::Memory> imageOut =
+      mgr.image(testVecOut, testVecOut.size(), 1, 1);
     // Tensor storage requires a vector to be passed only to reflect size
     std::shared_ptr<kp::Memory> tensorStorage =
       mgr.tensor({ 0, 0, 0 }, kp::Memory::MemoryTypes::eStorage);
@@ -251,7 +260,8 @@ TEST(TestOpTensorCopyToImage, CopyDeviceToDeviceImageUninitialised)
     std::vector<float> testVecA{ 1, 2, 3 };
 
     std::shared_ptr<kp::Memory> tensorA = mgr.tensor(testVecA);
-    std::shared_ptr<kp::Memory> imageB = mgr.imageT<float>(testVecA.size(), 1, 1);
+    std::shared_ptr<kp::Memory> imageB =
+      mgr.imageT<float>(testVecA.size(), 1, 1);
 
     EXPECT_TRUE(tensorA->isInit());
     EXPECT_TRUE(imageB->isInit());
@@ -260,7 +270,9 @@ TEST(TestOpTensorCopyToImage, CopyDeviceToDeviceImageUninitialised)
       ->eval<kp::OpTensorSyncDevice>({ tensorA })
       ->eval<kp::OpImageSyncDevice>({ imageB })
       ->eval<kp::OpTensorCopyToImage>({ tensorA, imageB })
-      ->eval<kp::OpTensorSyncLocal>({ tensorA, })
+      ->eval<kp::OpTensorSyncLocal>({
+        tensorA,
+      })
       ->eval<kp::OpImageSyncLocal>({ imageB });
 
     // Making sure the GPU holds the same vector

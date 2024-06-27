@@ -36,10 +36,9 @@ TEST(TestOpImageCopy, CopyDeviceToDeviceImage2D)
     std::vector<float> testVecA;
     std::vector<float> testVecB;
 
-    for(int i = 0; i < 256; i++)
-    {
-      testVecA.push_back(i);
-      testVecB.push_back(0);
+    for (int i = 0; i < 256; i++) {
+        testVecA.push_back(i);
+        testVecB.push_back(0);
     }
 
     std::shared_ptr<kp::Memory> imageA = mgr.image(testVecA, 16, 16, 1);
@@ -57,10 +56,9 @@ TEST(TestOpImageCopy, CopyDeviceToDeviceImage2D)
     EXPECT_EQ(imageA->vector(), imageB->vector());
 
     // Make sure that the vector matches the input vector
-    for(int i = 0; i < 256; i++)
-    {
-      EXPECT_EQ(imageA->vector()[i], testVecA[i]);
-      EXPECT_EQ(imageB->vector()[i], testVecA[i]);
+    for (int i = 0; i < 256; i++) {
+        EXPECT_EQ(imageA->vector()[i], testVecA[i]);
+        EXPECT_EQ(imageB->vector()[i], testVecA[i]);
     }
 }
 
@@ -179,8 +177,10 @@ TEST(TestOpImageCopy, CopyDeviceAndHostToDeviceAndHostImage)
     std::vector<float> testVecA{ 1, 2, 3 };
     std::vector<float> testVecB{ 0, 0, 0 };
 
-    std::shared_ptr<kp::Memory> imageA = mgr.image(testVecA, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
-    std::shared_ptr<kp::Memory> imageB = mgr.image(testVecB, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> imageA =
+      mgr.image(testVecA, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
+    std::shared_ptr<kp::Memory> imageB =
+      mgr.image(testVecB, 3, 1, 1, kp::Memory::MemoryTypes::eDeviceAndHost);
 
     EXPECT_TRUE(imageA->isInit());
     EXPECT_TRUE(imageB->isInit());

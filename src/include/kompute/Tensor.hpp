@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
-#include "kompute/Memory.hpp"
 #include "kompute/Core.hpp"
+#include "kompute/Memory.hpp"
 #include "logger/Logger.hpp"
 #include <memory>
 #include <string>
@@ -129,7 +129,7 @@ class Tensor : public Memory
      * @param copyFromImage Image to copy the data from
      */
     void recordCopyFrom(const vk::CommandBuffer& commandBuffer,
-                          std::shared_ptr<Image> copyFromImage);
+                        std::shared_ptr<Image> copyFromImage);
 
     /**
      * Records a copy from the internal staging memory to the device memory
@@ -226,10 +226,10 @@ class Tensor : public Memory
                           vk::DeviceSize bufferSize,
                           vk::BufferCopy copyRegion);
     void recordCopyBufferFromImage(const vk::CommandBuffer& commandBuffer,
-                         std::shared_ptr<vk::Image> imageFrom,
-                         std::shared_ptr<vk::Buffer> bufferTo,
-                         vk::DeviceSize /*bufferSize*/,
-                         vk::BufferImageCopy copyRegion);
+                                   std::shared_ptr<vk::Image> imageFrom,
+                                   std::shared_ptr<vk::Buffer> bufferTo,
+                                   vk::DeviceSize /*bufferSize*/,
+                                   vk::BufferImageCopy copyRegion);
     void recordBufferMemoryBarrier(const vk::CommandBuffer& commandBuffer,
                                    const vk::Buffer& buffer,
                                    vk::AccessFlagBits srcAccessMask,
@@ -283,10 +283,7 @@ class TensorT : public Tensor
 
     ~TensorT() { KP_LOG_DEBUG("Kompute TensorT destructor"); }
 
-    std::vector<T> vector()
-    {
-        return Memory::vector<T>();
-    }
+    std::vector<T> vector() { return Memory::vector<T>(); }
 
     T& operator[](int index) { return *(Memory::data<T>() + index); }
 

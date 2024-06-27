@@ -5,7 +5,8 @@
 
 namespace kp {
 
-OpTensorCopyToImage::OpTensorCopyToImage(const std::vector<std::shared_ptr<Memory>>& mem_objects)
+OpTensorCopyToImage::OpTensorCopyToImage(
+  const std::vector<std::shared_ptr<Memory>>& mem_objects)
 {
     KP_LOG_DEBUG("Kompute OpTensorCopyToImage constructor with params");
 
@@ -14,19 +15,19 @@ OpTensorCopyToImage::OpTensorCopyToImage(const std::vector<std::shared_ptr<Memor
           "Kompute OpTensorCopyToImage called with less than 2 mem objects");
     }
 
-    if (std::dynamic_pointer_cast<Tensor>(mem_objects.at(0)) == nullptr)
-    {
-        throw std::runtime_error("Kompute OpTensorCopyToImage: Memory object is not a Tensor");
+    if (std::dynamic_pointer_cast<Tensor>(mem_objects.at(0)) == nullptr) {
+        throw std::runtime_error(
+          "Kompute OpTensorCopyToImage: Memory object is not a Tensor");
     }
-    this->mTensor =  std::dynamic_pointer_cast<Tensor>(mem_objects.at(0));
+    this->mTensor = std::dynamic_pointer_cast<Tensor>(mem_objects.at(0));
 
-    for (size_t i = 1; i < mem_objects.size(); i++)
-    {
-        if (std::dynamic_pointer_cast<Image>(mem_objects.at(i)) == nullptr)
-        {
-            throw std::runtime_error("Kompute OpTensorCopyToImage: Memory object is not an Image");
+    for (size_t i = 1; i < mem_objects.size(); i++) {
+        if (std::dynamic_pointer_cast<Image>(mem_objects.at(i)) == nullptr) {
+            throw std::runtime_error(
+              "Kompute OpTensorCopyToImage: Memory object is not an Image");
         }
-        this->mImages.push_back(std::dynamic_pointer_cast<Image>(mem_objects.at(i)));
+        this->mImages.push_back(
+          std::dynamic_pointer_cast<Image>(mem_objects.at(i)));
     }
 
     kp::Tensor::TensorDataTypes dataType = this->mTensor->dataType();
@@ -75,8 +76,9 @@ OpTensorCopyToImage::postEval(const vk::CommandBuffer& /*commandBuffer*/)
 
     // Do not copy on CPU side if source is storage tensor
     if (this->mTensor->memoryType() == kp::Memory::MemoryTypes::eStorage) {
-        KP_LOG_DEBUG("Kompute OpTensorCopyToImage not copying tensor source given "
-                     "it's of eStorage type");
+        KP_LOG_DEBUG(
+          "Kompute OpTensorCopyToImage not copying tensor source given "
+          "it's of eStorage type");
         return;
     }
     void* data = this->mTensor->rawData();
@@ -85,8 +87,9 @@ OpTensorCopyToImage::postEval(const vk::CommandBuffer& /*commandBuffer*/)
     for (size_t i = 0; i < this->mImages.size(); i++) {
         if (this->mImages[i]->memoryType() ==
             kp::Memory::MemoryTypes::eStorage) {
-            KP_LOG_DEBUG("Kompute OpTensorCopyToImage not copying to tensor dest "
-                         "given it's of eStorage type");
+            KP_LOG_DEBUG(
+              "Kompute OpTensorCopyToImage not copying to tensor dest "
+              "given it's of eStorage type");
             continue;
         }
         this->mImages[i]->setRawData(data);

@@ -54,15 +54,16 @@ Image::getTensorDataType(Image::ImageDataTypes dt)
     }
 }
 
-void Image::init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
-             std::shared_ptr<vk::Device> device,
-             void* data,
-             uint32_t width,
-             uint32_t height,
-             uint32_t numChannels,
-             const ImageDataTypes& dataType,
-             vk::ImageTiling tiling,
-             const MemoryTypes& memoryType)
+void
+Image::init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
+            std::shared_ptr<vk::Device> device,
+            void* data,
+            uint32_t width,
+            uint32_t height,
+            uint32_t numChannels,
+            const ImageDataTypes& dataType,
+            vk::ImageTiling tiling,
+            const MemoryTypes& memoryType)
 {
     KP_LOG_DEBUG(
       "Kompute Image constructor data width: {}, height: {}, and type: {}",
@@ -75,15 +76,16 @@ void Image::init(std::shared_ptr<vk::PhysicalDevice> physicalDevice,
           "Kompute Image attempted to create a zero-sized image");
     }
 
-    if (memoryType == MemoryTypes::eStorage && data != nullptr)
-    {
-        KP_LOG_WARN("Kompute Image of type eStorage do not need to be initialised with data");
+    if (memoryType == MemoryTypes::eStorage && data != nullptr) {
+        KP_LOG_WARN("Kompute Image of type eStorage do not need to be "
+                    "initialised with data");
     }
 
-    if (tiling == vk::ImageTiling::eOptimal && 
-        (memoryType != Memory::MemoryTypes::eDevice && memoryType != Memory::MemoryTypes::eStorage))
-    {
-        throw std::runtime_error("Kompute Image with optimal tiling is only supported for eDevice and eStorage images");
+    if (tiling == vk::ImageTiling::eOptimal &&
+        (memoryType != Memory::MemoryTypes::eDevice &&
+         memoryType != Memory::MemoryTypes::eStorage)) {
+        throw std::runtime_error("Kompute Image with optimal tiling is only "
+                                 "supported for eDevice and eStorage images");
     }
 
     this->mPhysicalDevice = physicalDevice;
@@ -296,15 +298,12 @@ Image::recordCopyImage(const vk::CommandBuffer& commandBuffer,
 
 void
 Image::recordCopyImageFromTensor(const vk::CommandBuffer& commandBuffer,
-                       std::shared_ptr<vk::Buffer> bufferFrom,
-                       std::shared_ptr<vk::Image> imageTo,
-                       vk::BufferImageCopy copyRegion)
+                                 std::shared_ptr<vk::Buffer> bufferFrom,
+                                 std::shared_ptr<vk::Image> imageTo,
+                                 vk::BufferImageCopy copyRegion)
 {
-    commandBuffer.copyBufferToImage(*bufferFrom,
-                            *imageTo,
-                            vk::ImageLayout::eGeneral,
-                            1,
-                            &copyRegion);
+    commandBuffer.copyBufferToImage(
+      *bufferFrom, *imageTo, vk::ImageLayout::eGeneral, 1, &copyRegion);
 }
 
 void
@@ -551,7 +550,8 @@ Image::allocateMemoryCreateGPUResources()
     KP_LOG_DEBUG("Kompute Image creating primary image and memory");
 
     this->mPrimaryImage = std::make_shared<vk::Image>();
-    this->createImage(this->mPrimaryImage, this->getPrimaryImageUsageFlags(), this->mTiling);
+    this->createImage(
+      this->mPrimaryImage, this->getPrimaryImageUsageFlags(), this->mTiling);
     this->mFreePrimaryImage = true;
     this->mPrimaryMemory = std::make_shared<vk::DeviceMemory>();
     this->allocateBindMemory(this->mPrimaryImage,

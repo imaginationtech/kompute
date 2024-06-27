@@ -230,7 +230,7 @@ class Manager
         }
 
         return image;
-    }    
+    }
 
     template<typename T>
     std::shared_ptr<ImageT<T>> imageT(
@@ -290,7 +290,8 @@ class Manager
       vk::ImageTiling tiling,
       Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
-        return this->imageT<float>(data, width, height, numChannels, tiling, imageType);
+        return this->imageT<float>(
+          data, width, height, numChannels, tiling, imageType);
     }
 
     std::shared_ptr<ImageT<float>> image(
@@ -310,7 +311,8 @@ class Manager
       vk::ImageTiling tiling,
       Image::MemoryTypes imageType = Image::MemoryTypes::eDevice)
     {
-        return this->imageT<float>(width, height, numChannels, tiling, imageType);
+        return this->imageT<float>(
+          width, height, numChannels, tiling, imageType);
     }
 
     std::shared_ptr<ImageT<float>> image(
