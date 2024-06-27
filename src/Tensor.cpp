@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "kompute/Tensor.hpp"
+#include "kompute/Image.hpp"
 
 namespace kp {
 
@@ -116,6 +117,32 @@ Tensor::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
 }
 
 void
+Tensor::recordCopyFrom(const vk::CommandBuffer& commandBuffer,
+                       std::shared_ptr<Image> copyFromImage)
+{
+
+    vk::DeviceSize bufferSize(this->memorySize());
+
+    vk::ImageSubresourceLayers layer = {};
+    layer.aspectMask = vk::ImageAspectFlagBits::eColor;
+    layer.layerCount = 1;
+    vk::Offset3D offset = { 0, 0, 0 };
+
+    // FIXME: Check the size of the dest and source images match
+    vk::Extent3D size = { copyFromImage->getWidth(), copyFromImage->getHeight(), 1 };
+
+    vk::BufferImageCopy copyRegion(0, 0, 0, layer, offset, size);
+
+    KP_LOG_DEBUG("Kompute Tensor recordCopyFrom data size {}.", bufferSize);
+
+    this->recordCopyBufferFromImage(commandBuffer,
+                           copyFromImage->getPrimaryImage(),
+                           this->mPrimaryBuffer,
+                           bufferSize,
+                           copyRegion);
+}
+
+void
 Tensor::recordCopyFromStagingToDevice(const vk::CommandBuffer& commandBuffer)
 {
     vk::DeviceSize bufferSize(this->memorySize());
@@ -154,6 +181,16 @@ Tensor::recordCopyBuffer(const vk::CommandBuffer& commandBuffer,
 {
 
     commandBuffer.copyBuffer(*bufferFrom, *bufferTo, copyRegion);
+}
+
+void
+Tensor::recordCopyBufferFromImage(const vk::CommandBuffer& commandBuffer,
+                         std::shared_ptr<vk::Image> imageFrom,
+                         std::shared_ptr<vk::Buffer> bufferTo,
+                         vk::DeviceSize /*bufferSize*/,
+                         vk::BufferImageCopy copyRegion)
+{
+    commandBuffer.copyImageToBuffer(*imageFrom, vk::ImageLayout::eGeneral, *bufferTo, 1, &copyRegion);
 }
 
 void
@@ -318,6 +355,11 @@ Tensor::getStagingMemoryPropertyFlags()
         default:
             throw std::runtime_error("Kompute Tensor invalid tensor type");
     }
+}
+
+std::shared_ptr<vk::Buffer> Tensor::getPrimaryBuffer()
+{
+    return this->mPrimaryBuffer;
 }
 
 void

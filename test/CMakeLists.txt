@@ -17,6 +17,7 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestMultipleAlgoExecutions.cpp
     TestOpShadersFromStringAndFile.cpp
     TestOpTensorCopy.cpp
+    TestOpTensorCopyToImage.cpp
     TestOpTensorCreate.cpp
     TestOpTensorSync.cpp
     TestPushConstant.cpp
@@ -27,7 +28,8 @@ add_executable(kompute_tests TestAsyncOperations.cpp
     TestImage.cpp
     TestOpImageCreate.cpp
     TestOpImageCopy.cpp
-    TestOpImageSync.cpp)
+    TestOpImageSync.cpp
+    TestOpImageCopyToTensor.cpp)
 
 target_link_libraries(kompute_tests PRIVATE GTest::gtest_main
     kompute::kompute
